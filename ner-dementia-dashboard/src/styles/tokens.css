@@ -1,0 +1,23 @@
+:root {
+  --color-terracotta: #C1652F;
+  --color-sage: #8A9A66;
+  --color-ochre: #D9A441;
+  --color-brown: #4A3226;
+  --color-background: #F6EFE4;
+  --color-charcoal: #2A211B;
+
+  --font-size-base: 20px;
+  --font-size-lg: 26px;
+  --font-size-xl: 32px;
+
+  --touch-target-min: 64px;
+  --spacing-unit: 8px;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-charcoal);
+  font-size: var(--font-size-base);
+  font-family: system-ui, sans-serif;
+  margin: 0;
+}
