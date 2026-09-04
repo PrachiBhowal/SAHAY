@@ -39,6 +39,8 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ email, password, role }),
     }),
+  getPatient: (patientId) => request(`/patients/${patientId}`),
   getSessions: (patientId, range = "week") =>
     request(`/patients/${patientId}/sessions?range=${range}`),
+  getAlerts: (patientId) => request(`/patients/${patientId}/alerts`),
 };
