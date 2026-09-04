@@ -1,0 +1,7 @@
+/* add to src/StillUseful.css */
+.still-useful-error {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-terracotta);
+  margin-top: 20px;
+}

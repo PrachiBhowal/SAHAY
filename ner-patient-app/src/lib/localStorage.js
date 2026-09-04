@@ -1,5 +1,15 @@
-// src/lib/localStorage.js
-import { openDB } from 'idb'
+// add to src/lib/localStorage.js
+
+/**
+ * Returns all locally stored GameSessions for a patient, most recent
+ * first. Used to hydrate Person 4's performanceTracker on app start so
+ * the rolling window isn't empty after every reload.
+ */
+export async function getSessionsForPatient(patientId) {
+  const db = await getDB()
+  const all = await db.getAllFromIndex(STORES.GAME_SESSIONS, 'patient_id', patientId)
+  return all.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+}import { openDB } from 'idb'
 
 const DB_NAME = 'ner_care_app'
 const DB_VERSION = 1
