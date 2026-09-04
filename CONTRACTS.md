@@ -218,7 +218,14 @@ useTTS(): { speak: (text: string, lang: string) => void, isSpeaking: boolean }
 ```typescript
 getCurrentTier(patientId: string, gameType: GameType): DifficultyTier
 updateTierAfterSession(patientId: string, gameType: GameType, session: GameSession): DifficultyTier
+hydrate(patientId: string, difficultyTiers: Patient["difficulty_tiers"]): void
 ```
+
+> **`hydrate` usage note:** Must be called once per patient load, before any game round is played, seeded from `patient.difficulty_tiers` (the value returned by `GET /patients/:id`). Without this call, the engine's rolling window starts empty and tier defaults to 2 regardless of the patient's actual saved progress. All four games (P1–P4) must call this on mount.
+
+> **Implementation note (P4):** `hydrate` is technically exported from `performanceTracker.js` and re-exposed through the difficulty engine surface — listed here because this is the interface other games call into, not because `difficultyEngine.js` owns the rolling-window logic directly.
+
+> **Persistence gap (open — P5 action needed):** `hydrate` reads `patient.difficulty_tiers`, but there is currently no `PATCH /patients/:id` endpoint and no `updatePatientTier()` on P1's storage layer to *write* tier changes back after a session. Without that write path, tier progress resets to the hydrated value on every reload. P4's `registerPersistHandler()` hook is already in place for when P5 adds this — no change to the engine is needed, just the backend endpoint and a one-line hook registration in the patient app shell.
 
 Everyone building a game (Person 1-4) imports and calls these three modules rather than reimplementing storage, voice, or difficulty logic locally.
 
