@@ -1,7 +1,10 @@
 // src/games/Game1FamilyRecognition.jsx
 import { useState, useEffect } from 'react'
 import { saveSession, getPatientData, getMemoryAssets } from '../lib/localStorage'
+import { useASR } from '../hooks/useASR'
 import './Game1.css'
+
+const MAX_GENTLE_MISSES = 6
 
 function modeForTier(tier) {
   return tier <= 2 ? 'voice_recall' : 'multiple_choice'
@@ -15,6 +18,7 @@ export default function Game1FamilyRecognition({ onBack }) {
   const [sessionStart, setSessionStart] = useState(null)
   const [hintsUsed, setHintsUsed] = useState(0)
   const [redirectMessage, setRedirectMessage] = useState('Take your time.')
+  const { transcript, isListening, isReady, startListening } = useASR()
 
   useEffect(() => {
     async function load() {
@@ -28,11 +32,28 @@ export default function Game1FamilyRecognition({ onBack }) {
     load()
   }, [])
 
+  useEffect(() => {
+    if (!transcript || !currentPhoto) return
+    handleAnswer(transcript.toLowerCase().trim(), currentPhoto.tags[0].toLowerCase().trim())
+  }, [transcript, currentPhoto?.id])
+
   function pickRound(pool) {
-    if (pool.length < 4) return
+    // No photos at all — tell the truth instead of spinning forever.
+    if (pool.length === 0) {
+      setCurrentPhoto(null)
+      setOptions([])
+      setRedirectMessage('No family photos yet — ask a caregiver to add some.')
+      return
+    }
+
     const shuffled = [...pool].sort(() => Math.random() - 0.5)
     const target = shuffled[0]
-    const distractors = shuffled.slice(1, 4)
+
+    // Works whether we have 4+ photos or fewer — never silently stalls.
+    const distractors = shuffled
+      .filter(p => p.id !== target.id)
+      .slice(0, Math.min(3, shuffled.length - 1))
+
     setCurrentPhoto(target)
     setOptions([target, ...distractors].sort(() => Math.random() - 0.5))
     setSessionStart(Date.now())
@@ -45,12 +66,21 @@ export default function Game1FamilyRecognition({ onBack }) {
     const responseTimeMs = Date.now() - sessionStart
 
     if (!isCorrect) {
-      setHintsUsed(h => h + 1)
-      const nudges = [
-        'Take another look.',
-        'No rush at all.',
-        'Have another look at the photo.'
-      ]
+      const nextMisses = hintsUsed + 1
+      setHintsUsed(nextMisses)
+
+      // Never let the patient get stuck in an unbounded loop of gentle
+      // failure — after enough misses, quietly rotate to a new photo
+      // instead of endlessly re-prompting the same one. Mirrors Game 2's
+      // 6-miss rotation so the validation-therapy principle holds in
+      // spirit, not just in literal "no wrong answer shown."
+      if (nextMisses >= MAX_GENTLE_MISSES) {
+        setRedirectMessage("Let's try someone else.")
+        setTimeout(() => pickRound(photos), 1500)
+        return
+      }
+
+      const nudges = ['Take another look.', 'No rush at all.', 'Have another look at the photo.']
       setRedirectMessage(nudges[hintsUsed % nudges.length])
       return
     }
@@ -72,9 +102,25 @@ export default function Game1FamilyRecognition({ onBack }) {
     setTimeout(() => pickRound(photos), 1500)
   }
 
-  const mode = patient ? modeForTier(patient.difficulty_tiers.memory) : null
+  // Voice-recall mode requires real ASR. If it's not ready yet, fall back
+  // to multiple-choice rather than showing a mic button that does nothing —
+  // a dead control is worse than a mode switch the patient never notices.
+  const requestedMode = patient ? modeForTier(patient.difficulty_tiers.memory) : null
+  const mode = requestedMode === 'voice_recall' && !isReady ? 'multiple_choice' : requestedMode
 
-  if (!patient || !currentPhoto) return <div className="game1-loading">Loading...</div>
+  if (!patient) return <div className="game1-loading">Loading...</div>
+
+  // No photos available yet — show the real state instead of an infinite spinner.
+  if (!currentPhoto) {
+    return (
+      <div className="game1-shell">
+        <button className="game1-back" onClick={onBack}>&#8592; Back</button>
+        <div className="game1-content">
+          <p className="game1-message" aria-live="polite">{redirectMessage}</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="game1-shell">
@@ -102,7 +148,9 @@ export default function Game1FamilyRecognition({ onBack }) {
 
       {mode === 'voice_recall' && (
         <div className="game1-voice-recall">
-          <button className="game1-mic-btn">Say the name</button>
+          <button className="game1-mic-btn" onClick={startListening} disabled={isListening}>
+            {isListening ? 'Listening...' : 'Say the name'}
+          </button>
         </div>
       )}
     </div>
