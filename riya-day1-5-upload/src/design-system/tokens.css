@@ -1,0 +1,118 @@
+/* ============================================================
+   DESIGN TOKENS — SIH26003 NER Dementia Care Platform
+   Owner: Person 2 (per CONTRACTS.md Section 8)
+
+   Import this file once at the app root (e.g. in index.js / App.jsx).
+   Everyone else: reference these variable NAMES in your CSS.
+   Never hardcode hex values, px sizes, or touch-target sizes directly.
+   ============================================================ */
+
+:root {
+  /* ---- Color palette (CONTRACTS.md Section 8) ---- */
+  --color-terracotta: #C77B4F;
+  --color-sage: #8A9A7B;
+  --color-ochre: #D9A441;
+  --color-brown: #6B4F3B;
+  --color-background: #FAF6F0;
+  --color-text: #3A2E24;
+
+  /* Semantic aliases — use these in components instead of raw palette
+     names where possible, so a future palette swap is a one-line change */
+  --color-surface: var(--color-background);
+  --color-primary: var(--color-terracotta);
+  --color-accent: var(--color-ochre);
+  --color-success: var(--color-sage);
+  --color-body-text: var(--color-text);
+
+  /* Text-on-fill pairing: terracotta fails 4.5:1 with light text
+     (~2.9:1), so buttons use dark text on terracotta, not white */
+  --color-on-primary: var(--color-text);
+  --color-on-surface: var(--color-text);
+
+  /* ---- Typography ---- */
+  --font-size-base: 20px;
+  --font-size-lg: 26px;
+  --font-size-xl: 32px;
+
+  /* Multiplier driven by the font-scale toggle (see AccessibilityContext).
+     Default = 1. Every component should size text with calc(), e.g.:
+     font-size: calc(var(--font-size-base) * var(--font-scale)); */
+  --font-scale: 1;
+
+  /* ---- Layout ---- */
+  --touch-target-min: 64px;
+  --spacing-unit: 8px;
+
+  /* ---- Motion (Section 7 of AI_HANDOFF: slow, calm transitions) ---- */
+  --transition-slow: 600ms ease;
+  --transition-base: 300ms ease;
+}
+
+/* ============================================================
+   HIGH-CONTRAST MODE
+   Toggled by setting data-high-contrast="true" on <html> or <body>.
+   Handled automatically by AccessibilityContext — don't set manually
+   unless you're testing.
+   ============================================================ */
+[data-high-contrast="true"] {
+  --color-background: #FFFFFF;
+  --color-text: #000000;
+  --color-surface: #FFFFFF;
+  --color-body-text: #000000;
+  --color-on-surface: #000000;
+
+  /* Keep brand hues recognizable but push them dark enough to clear
+     4.5:1 against white, since the base palette is decorative-only */
+  --color-terracotta: #8A4423;
+  --color-sage: #4A5A3A;
+  --color-ochre: #8A5F12;
+  --color-primary: var(--color-terracotta);
+  --color-accent: var(--color-ochre);
+  --color-success: var(--color-sage);
+  --color-on-primary: #FFFFFF;
+}
+
+/* ============================================================
+   SUNDOWN MODE
+   Toggled by setting data-sundown="true" on <html>, driven by
+   SundownContext (see sundown/SundownContext.jsx). Calms palette,
+   slows transitions, and signals to game components (e.g. GameTwo)
+   to lower background audio volume — real dementia "sundowning"
+   pattern per AI_HANDOFF Section 2 differentiators.
+   ============================================================ */
+[data-sundown="true"] {
+  /* Dimmer, warmer, lower-energy version of the same palette —
+     never a jarring theme swap, just quieter */
+  --color-background: #EFE6D8;
+  --color-ochre: #C79236;
+  --color-terracotta: #B06B41;
+
+  /* Motion slows further than the base calm defaults */
+  --transition-slow: 1100ms ease;
+  --transition-base: 550ms ease;
+}
+
+/* High-contrast + sundown together: keep the AA-safe darkened accents
+   from high-contrast mode, just don't also apply the warm dimming —
+   safety/legibility wins over ambiance if both are active */
+[data-high-contrast="true"][data-sundown="true"] {
+  --color-background: #FFFFFF;
+}
+
+/* ============================================================
+   REDUCED MOTION — always respect this regardless of sundown mode
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-slow: 0ms;
+    --transition-base: 0ms;
+  }
+}
+
+/* ---- Base element defaults, built on the tokens above ---- */
+body {
+  background-color: var(--color-surface);
+  color: var(--color-body-text);
+  font-size: calc(var(--font-size-base) * var(--font-scale));
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
