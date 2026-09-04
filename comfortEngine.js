@@ -22,6 +22,9 @@
  * P6's dashboard analytics also reads GameSession.
  */
 
+import { getMemoryAssets } from './ner-patient-app/src/lib/localStorage.js';
+import { getCalmingTracks } from './riya-day1-5-upload/src/music/musicLibrary.js';
+
 // ---- Config (tune here, not scattered through the code) ----------------
 export const COMFORT_CONFIG = {
   LOW_ENGAGEMENT_ACCURACY_THRESHOLD: 0.3, // accuracy below this = struggling/disengaged
@@ -128,14 +131,23 @@ export async function fireComfortTrigger({ patientId, triggerType, apiBaseUrl, a
   const alertLog = await alertRes.json();
 
   // 2. Pull memory assets and pick something comforting
-  const assetsRes = await fetch(`${apiBaseUrl}/patients/${patientId}/memory-assets`, {
-    method: "GET",
-    headers,
-  });
   let comfortContent = null;
-  if (assetsRes.ok) {
-    const memoryAssets = await assetsRes.json();
-    comfortContent = selectComfortContent(memoryAssets);
+  try {
+    const memoryAssets = await getMemoryAssets(patientId);
+    const calmingMusic = getCalmingTracks().map((track) => ({
+      id: track.id,
+      patient_id: patientId,
+      type: "music",
+      url: track.url,
+      tags: track.tags,
+      uploaded_by: "system",
+      created_at: new Date().toISOString(),
+    }));
+
+    const combinedAssets = [...memoryAssets, ...calmingMusic];
+    comfortContent = selectComfortContent(combinedAssets);
+  } catch (err) {
+    console.error("Failed to load local comfort content:", err);
   }
   // If the memory-assets fetch fails, we still return the alertLog — the
   // de-escalation UI can show a generic calming fallback (see ComfortTrigger.jsx).
