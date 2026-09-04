@@ -8,15 +8,28 @@ import MonthlyAnalyticsChart from "./components/MonthlyAnalyticsChart";
 import EngagementChart from "./components/EngagementChart";
 import RemindersPanel from "./components/RemindersPanel";
 import PatientsList from "./components/PatientsList";
+import AlertsPanel from "./components/AlertsPanel";
 
 const defaultPatient = { id: "p1", name: "Rina Devi", region_village: "Nagaon, Assam" };
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
-  const [activePatient, setActivePatient] = useState(defaultPatient);
+  const [patients, setPatients] = useState([]);
+  const [activePatient, setActivePatient] = useState(null);
+
+  useEffect(() => {
+    if (!user) return;
+    Promise.all((user.linked_patient_ids || []).map((id) => api.getPatient(id)))
+      .then((fetched) => {
+        setPatients(fetched);
+        setActivePatient((prev) => prev || fetched[0] || null);
+      })
+      .catch((err) => console.error("Failed to load patients:", err));
+  }, [user]);
 
   if (!user) return <Login onLogin={setUser} />;
+  if (!activePatient) return <div style={styles.main}>Loading patients…</div>;
 
   const isAsha = user.role === "asha_worker";
 
@@ -84,15 +97,10 @@ export default function App() {
 
         {activeTab === "reminders" && <RemindersPanel />}
 
-        {activeTab === "alerts" && (
-          <div style={styles.placeholderCard}>
-            <h2 style={{ color: "var(--color-brown)" }}>Alerts</h2>
-            <p style={{ color: "var(--color-sage)" }}>Not built yet — coming soon.</p>
-          </div>
-        )}
+        {activeTab === "alerts" && <AlertsPanel patientId={activePatient.id} />}
 
         {activeTab === "patients" && isAsha && (
-          <PatientsList activePatientId={activePatient.id} onSelect={handleSelectPatient} />
+          <PatientsList patients={patients} activePatientId={activePatient.id} onSelect={handleSelectPatient} />
         )}
       </main>
     </div>
