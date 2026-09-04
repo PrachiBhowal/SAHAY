@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { CLUE_BANK } from "./clueBank.js";
-import { getRecentRounds, subscribe as subscribeToRounds } from "./performanceTracker.js";
+import { getRecentRounds, subscribe as subscribeToRounds, hydrate as hydrateWindow } from "./performanceTracker.js";
 import { getCurrentTier, updateTierAfterSession } from "./difficultyEngine.js";
 import { saveSession } from "./ner-patient-app/src/lib/localStorage.js";
 
@@ -67,12 +67,28 @@ export default function Game4PatternWordChain({ patientId = DEMO_PATIENT_ID }) {
   const [log, setLog] = useState(() => getRecentRounds(patientId, "pattern"));
   const startTimeRef = useRef(Date.now());
 
-  // In a real deploy, seed the window from Person 1's local storage here, e.g.:
-  //   getPatientData().then(({ sessions }) => hydrate(patientId, "pattern", sessions));
-  // For now there's nothing to hydrate from, so this just subscribes to live
-  // updates so the "Recent rounds" list stays in sync with the shared tracker
-  // even if something else (another tab, the difficulty engine) touches it.
   useEffect(() => {
+    // ---- DEMO SEEDING ----
+    // Pre-load 4 recent sessions averaging exactly 0.8 (HARDER_THRESHOLD).
+    // This puts the engine right on the edge: if the judge plays one perfect
+    // round (1.0), the 5-round rolling average hits 0.84, triggering an immediate
+    // visible escalation to tier 3.
+    const now = Date.now();
+    const demoSessions = Array.from({ length: 4 }).map((_, i) => ({
+      patient_id: patientId,
+      game_type: "pattern",
+      accuracy: 0.8, // 4 clues total, so 0.8 means 1 hint used per round
+      response_time_ms: 2500,
+      hints_used: 1,
+      difficulty_tier: 2,
+      timestamp: new Date(now - (4 - i) * 60000).toISOString(),
+    }));
+    
+    // Seed the shared rolling window
+    hydrateWindow(patientId, "pattern", demoSessions);
+
+    // -----------------------
+
     const unsubscribe = subscribeToRounds(patientId, "pattern", (stats) => {
       setLog(getRecentRounds(patientId, "pattern"));
     });
