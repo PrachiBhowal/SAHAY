@@ -6,6 +6,10 @@ export function setToken(token) {
   authToken = token;
 }
 
+export function clearToken() {
+  authToken = null;
+}
+
 async function request(path, options = {}) {
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,

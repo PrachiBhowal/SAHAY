@@ -1,0 +1,113 @@
+/* src/HomeScreen.css */
+.home-shell {
+  min-height: 100vh;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: calc(var(--spacing-unit) * 4) calc(var(--spacing-unit) * 3);
+}
+
+.home-greeting {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--color-text-muted);
+  margin: 0 0 4px;
+}
+
+.home-headline {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--font-size-xl);
+  color: var(--color-text);
+  margin: 0 0 28px;
+  line-height: 1.2;
+}
+
+.home-featured-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  overflow: hidden;
+  padding: 0;
+  cursor: pointer;
+  margin-bottom: calc(var(--spacing-unit) * 4);
+}
+
+.home-featured-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+.home-featured-body {
+  padding: calc(var(--spacing-unit) * 2.5);
+}
+
+.home-featured-label {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-muted);
+  margin: 0 0 6px;
+}
+
+.home-featured-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--color-text);
+  margin: 0 0 16px;
+}
+
+.home-begin-btn {
+  min-height: var(--touch-target-min);
+  border-radius: 14px;
+  background: var(--color-terracotta);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+}
+
+.home-section-label {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-muted);
+  margin: 0 0 10px;
+}
+
+.home-row-list {
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.home-row {
+  width: 100%;
+  min-height: var(--touch-target-min);
+  background: var(--color-surface);
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 calc(var(--spacing-unit) * 2.5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.home-row:last-child {
+  border-bottom: none;
+}
+
+.home-row:disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
