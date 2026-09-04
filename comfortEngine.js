@@ -22,7 +22,7 @@
  * P6's dashboard analytics also reads GameSession.
  */
 
-import { getMemoryAssets } from './ner-patient-app/src/lib/localStorage.js';
+import { getMemoryAssets, queueForSync } from './ner-patient-app/src/lib/localStorage.js';
 import { getCalmingTracks } from './riya-day1-5-upload/src/music/musicLibrary.js';
 
 // ---- Config (tune here, not scattered through the code) ----------------
@@ -118,17 +118,17 @@ export async function fireComfortTrigger({ patientId, triggerType, apiBaseUrl, a
     Authorization: `Bearer ${authToken}`,
   };
 
-  // 1. Log the alert (this is what makes it show up on Person 6's panel)
-  const alertRes = await fetch(`${apiBaseUrl}/patients/${patientId}/alerts`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ trigger_type: triggerType }),
-  });
-  if (!alertRes.ok) {
-    const err = await safeJson(alertRes);
-    throw new Error(`Failed to log AlertLog: ${err?.message || alertRes.statusText}`);
-  }
-  const alertLog = await alertRes.json();
+  // 1. Log the alert via Person 1's offline storage layer
+  // This ensures the alert isn't lost if the patient app is offline.
+  // It will surface on Person 6's panel once Person 5's sync engine pushes it.
+  const alertLog = {
+    id: crypto.randomUUID(),
+    patient_id: patientId,
+    trigger_type: triggerType,
+    timestamp: new Date().toISOString(),
+    resolved: false,
+  };
+  await queueForSync(alertLog);
 
   // 2. Pull memory assets and pick something comforting
   let comfortContent = null;
