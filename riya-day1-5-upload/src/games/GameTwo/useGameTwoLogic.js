@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { OBJECT_BANK, DIFFICULTY_CONFIG } from './objectBank';
 import { saveSession, getPatientData } from './localStorageStub';
-import { getCurrentTier, updateTierAfterSession } from '../../difficulty/difficultyEngineStub';
+import { getCurrentTier, updateTierAfterSession } from '../../../../difficultyEngine.js';
 
 const GAME_TYPE = 'attention';
 // Soft ceiling on attempts per round. Not a "failure" — after this many
