@@ -120,6 +120,18 @@ export function getCurrentTier(patientId, gameType) {
  */
 export function updateTierAfterSession(patientId, gameType, session) {
   assertGameType(gameType);
+
+  // Daily Routine Recall (Game 3) is open-ended and intentionally unscored —
+  // there is no meaningful accuracy value to feed the tier calculation.
+  // Tier adjustment is disabled for "recall" until the team agrees on a
+  // recall-specific metric. Tier stays pinned at whatever it currently is
+  // (default tier 2 for a new patient). We deliberately do NOT call
+  // recordRound here either, since storing a meaningless accuracy value
+  // would pollute the rolling average once a real metric is introduced.
+  if (gameType === "recall") {
+    return getCurrentTier(patientId, gameType);
+  }
+
   const key = keyFor(patientId, gameType);
   const previousTier = getCurrentTier(patientId, gameType);
 
