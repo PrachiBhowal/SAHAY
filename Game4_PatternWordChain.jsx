@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { CLUE_BANK } from "./clueBank.js";
 import { getRecentRounds, subscribe as subscribeToRounds } from "./performanceTracker.js";
 import { getCurrentTier, updateTierAfterSession } from "./difficultyEngine.js";
+import { saveSession } from "./ner-patient-app/src/lib/localStorage.js";
 
 /* ============================================================
    GAME 4 — Pattern / Word-Chain Recognition
@@ -26,12 +27,6 @@ import { getCurrentTier, updateTierAfterSession } from "./difficultyEngine.js";
      component state — every game reads/writes the same window
      per (patientId, game_type).
    ============================================================ */
-
-// ---- STUB: replace with `import { saveSession } from "../storage/localStorageLayer"` ----
-async function saveSession(session) {
-  console.log("[saveSession stub]", session);
-  return Promise.resolve();
-}
 
 const DEMO_PATIENT_ID = "demo-patient-001";
 
@@ -114,8 +109,10 @@ export default function Game4PatternWordChain({ patientId = DEMO_PATIENT_ID }) {
     setPhase(isCorrect ? "correct" : "wrong");
 
     const session = {
+      id: crypto.randomUUID(),
       patient_id: patientId,
       game_type: "pattern",
+      timestamp: new Date().toISOString(),
       accuracy,
       response_time_ms: responseTimeMs,
       hints_used: hintsUsed,
