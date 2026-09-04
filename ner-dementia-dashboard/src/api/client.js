@@ -15,7 +15,14 @@ async function request(path, options = {}) {
       ...options.headers,
     },
   });
-  const data = await res.json();
+
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    throw new Error("Server error — please try again");
+  }
+
   if (!res.ok || data.error) {
     throw new Error(data.message || "Request failed");
   }

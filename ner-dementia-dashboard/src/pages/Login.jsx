@@ -23,11 +23,20 @@ export default function Login({ onLogin }) {
     }
   }
 
-  async function mockLogin(email, password, role) {
-    await new Promise((r) => setTimeout(r, 300));
-    if (!email || !password) throw new Error("Email and password required");
-    return { token: "dev-token", user: { id: "caregiver-1", role, email } };
+  async function handleSubmit(e) {
+  e.preventDefault();
+  setError(null);
+  setLoading(true);
+  try {
+    const data = await api.login(email, password, role);
+    setToken(data.token);
+    onLogin(data.user);
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
   }
+}
 
   return (
     <div style={styles.wrapper}>
