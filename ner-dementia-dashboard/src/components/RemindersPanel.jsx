@@ -1,37 +1,5 @@
 import { useState } from "react";
-
-const initialReminders = [
-  {
-    id: "r1",
-    patient_id: "p1",
-    type: "medicine",
-    time: "08:00",
-    recurrence: "daily",
-    message: "Take morning blood pressure tablet",
-    voice_note_url: null,
-    completed_today: true,
-  },
-  {
-    id: "r2",
-    patient_id: "p1",
-    type: "hydration",
-    time: "11:00",
-    recurrence: "daily",
-    message: "Drink a glass of water",
-    voice_note_url: null,
-    completed_today: false,
-  },
-  {
-    id: "r3",
-    patient_id: "p1",
-    type: "appointment",
-    time: "16:30",
-    recurrence: "once",
-    message: "Visit ASHA worker for weekly check-in",
-    voice_note_url: null,
-    completed_today: false,
-  },
-];
+import { api } from "../api/client";
 
 const typeLabels = {
   medicine: "Medicine",
@@ -54,11 +22,12 @@ const emptyForm = {
   message: "",
 };
 
-export default function RemindersPanel() {
-  const [reminders, setReminders] = useState(initialReminders);
+export default function RemindersPanel({ patientId, reminders, setReminders }) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
   function openCreateForm() {
     setForm(emptyForm);
@@ -77,23 +46,31 @@ export default function RemindersPanel() {
     setShowForm(true);
   }
 
-  function handleSave(e) {
+  async function handleSave(e) {
     e.preventDefault();
+    setError(null);
+
     if (editingId) {
       setReminders((prev) =>
         prev.map((r) => (r.id === editingId ? { ...r, ...form } : r))
       );
-    } else {
-      const newReminder = {
-        id: `r${Date.now()}`,
-        patient_id: "p1",
-        voice_note_url: null,
-        completed_today: false,
-        ...form,
-      };
-      setReminders((prev) => [...prev, newReminder]);
+      setShowForm(false);
+      return;
     }
-    setShowForm(false);
+
+    setSaving(true);
+    try {
+      const created = await api.createReminder(patientId, {
+        ...form,
+        voice_note_url: null,
+      });
+      setReminders((prev) => [...prev, created]);
+      setShowForm(false);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
   }
 
   function toggleComplete(id) {
@@ -116,6 +93,8 @@ export default function RemindersPanel() {
           + Add Reminder
         </button>
       </div>
+
+      {error && <p style={{ color: "#B23A2F", fontSize: 14 }}>Couldn't save: {error}</p>}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {reminders.map((r) => (
@@ -206,8 +185,8 @@ export default function RemindersPanel() {
             />
 
             <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-              <button type="submit" style={styles.saveButton}>
-                {editingId ? "Save Changes" : "Create Reminder"}
+              <button type="submit" disabled={saving} style={styles.saveButton}>
+                {saving ? "Saving…" : editingId ? "Save Changes" : "Create Reminder"}
               </button>
               <button type="button" onClick={() => setShowForm(false)} style={styles.cancelButton}>
                 Cancel

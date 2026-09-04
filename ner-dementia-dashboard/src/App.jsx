@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./styles/tokens.css";
 import Login from "./pages/Login";
-import { clearToken } from "./api/client";
+import { api, clearToken } from "./api/client";
 import PatientOverview from "./components/PatientOverview";
 import WeeklyGameTypeChart from "./components/WeeklyGameTypeChart";
 import MonthlyAnalyticsChart from "./components/MonthlyAnalyticsChart";
@@ -10,14 +10,19 @@ import RemindersPanel from "./components/RemindersPanel";
 import PatientsList from "./components/PatientsList";
 import AlertsPanel from "./components/AlertsPanel";
 
-const defaultPatient = { id: "p1", name: "Rina Devi", region_village: "Nagaon, Assam" };
-
 export default function App() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
   const [patients, setPatients] = useState([]);
   const [activePatient, setActivePatient] = useState(null);
 
+  const [weeklySessions, setWeeklySessions] = useState([]);
+  const [monthlySessions, setMonthlySessions] = useState([]);
+  const [reminders, setReminders] = useState([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
+  const [sessionsError, setSessionsError] = useState(null);
+
+  // Load the caregiver's linked patients once logged in
   useEffect(() => {
     if (!user) return;
     Promise.all((user.linked_patient_ids || []).map((id) => api.getPatient(id)))
@@ -27,6 +32,36 @@ export default function App() {
       })
       .catch((err) => console.error("Failed to load patients:", err));
   }, [user]);
+
+  // Load sessions (week + month) and reminders whenever the active patient changes
+  useEffect(() => {
+    if (!activePatient) return;
+    let cancelled = false;
+    setSessionsLoading(true);
+    setSessionsError(null);
+
+    Promise.all([
+      api.getSessions(activePatient.id, "week"),
+      api.getSessions(activePatient.id, "month"),
+      api.getReminders(activePatient.id),
+    ])
+      .then(([week, month, remindersData]) => {
+        if (cancelled) return;
+        setWeeklySessions(week);
+        setMonthlySessions(month);
+        setReminders(remindersData);
+      })
+      .catch((err) => {
+        if (!cancelled) setSessionsError(err.message);
+      })
+      .finally(() => {
+        if (!cancelled) setSessionsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activePatient]);
 
   if (!user) return <Login onLogin={setUser} />;
   if (!activePatient) return <div style={styles.main}>Loading patients…</div>;
@@ -40,16 +75,22 @@ export default function App() {
     ...(isAsha ? [{ id: "patients", label: "Patients" }] : []),
   ];
 
+  // Last active = most recent session timestamp (Patient in CONTRACTS.md has no last_active field)
+  const lastActive = weeklySessions.length
+    ? weeklySessions.reduce((latest, s) => (s.timestamp > latest ? s.timestamp : latest), weeklySessions[0].timestamp)
+    : null;
+
   function handleSelectPatient(patient) {
     setActivePatient(patient);
-    setActiveTab("overview"); // jump straight to that patient's overview
+    setActiveTab("overview");
   }
 
   function handleLogout() {
     clearToken();
     setUser(null);
     setActiveTab("overview");
-    setActivePatient(defaultPatient);
+    setActivePatient(null); // was: defaultPatient — that stub blocked re-fetch on next login
+    setPatients([]);
   }
 
   return (
@@ -86,16 +127,34 @@ export default function App() {
           <div style={styles.badge}>Patient: {activePatient.name}</div>
         </header>
 
+        {sessionsError && (
+          <p style={{ color: "#B23A2F", marginBottom: 16 }}>
+            Couldn't load session data: {sessionsError}
+          </p>
+        )}
+
         {activeTab === "overview" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-            <PatientOverview />
-            <WeeklyGameTypeChart />
-            <MonthlyAnalyticsChart />
-            <EngagementChart />
+            <PatientOverview patient={activePatient} lastActive={lastActive} />
+            {sessionsLoading ? (
+              <p style={{ color: "var(--color-sage)" }}>Loading charts…</p>
+            ) : (
+              <>
+                <WeeklyGameTypeChart sessions={weeklySessions} />
+                <MonthlyAnalyticsChart sessions={monthlySessions} />
+                <EngagementChart sessions={weeklySessions} />
+              </>
+            )}
           </div>
         )}
 
-        {activeTab === "reminders" && <RemindersPanel />}
+        {activeTab === "reminders" && (
+          <RemindersPanel
+            patientId={activePatient.id}
+            reminders={reminders}
+            setReminders={setReminders}
+          />
+        )}
 
         {activeTab === "alerts" && <AlertsPanel patientId={activePatient.id} />}
 

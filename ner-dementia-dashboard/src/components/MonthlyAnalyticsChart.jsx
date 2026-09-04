@@ -2,12 +2,25 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Dot,
 } from "recharts";
 
-const dummyMonthlyData = [
-  { week: "Week 1", avgAccuracy: 58 },
-  { week: "Week 2", avgAccuracy: 64 },
-  { week: "Week 3", avgAccuracy: 41 }, 
-  { week: "Week 4", avgAccuracy: 69 },
-];
+function aggregateByWeek(sessions) {
+  if (sessions.length === 0) return [];
+  const sorted = [...sessions].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  const start = new Date(sorted[0].timestamp);
+
+  const buckets = {};
+  sorted.forEach((s) => {
+    const days = Math.floor((new Date(s.timestamp) - start) / (1000 * 60 * 60 * 24));
+    const weekIndex = Math.floor(days / 7) + 1;
+    const label = `Week ${weekIndex}`;
+    if (!buckets[label]) buckets[label] = { total: 0, count: 0 };
+    buckets[label].total += s.accuracy * 100;
+    buckets[label].count += 1;
+  });
+
+  return Object.entries(buckets)
+    .sort((a, b) => parseInt(a[0].replace("Week ", "")) - parseInt(b[0].replace("Week ", "")))
+    .map(([week, { total, count }]) => ({ week, avgAccuracy: Math.round(total / count) }));
+}
 
 function detectAnomalies(data, threshold = 15) {
   const mean = data.reduce((sum, d) => sum + d.avgAccuracy, 0) / data.length;
@@ -20,23 +33,26 @@ function detectAnomalies(data, threshold = 15) {
 function AnomalyDot(props) {
   const { cx, cy, payload } = props;
   if (payload.isAnomaly) {
-    return (
-      <Dot
-        cx={cx}
-        cy={cy}
-        r={8}
-        fill="#fff"
-        stroke="var(--color-terracotta)"
-        strokeWidth={3}
-      />
-    );
+    return <Dot cx={cx} cy={cy} r={8} fill="#fff" stroke="var(--color-terracotta)" strokeWidth={3} />;
   }
   return <Dot cx={cx} cy={cy} r={4} fill="var(--color-ochre)" />;
 }
 
-export default function MonthlyAnalyticsChart({ data = dummyMonthlyData }) {
-  const enriched = detectAnomalies(data);
+export default function MonthlyAnalyticsChart({ sessions = [] }) {
+  const weekly = aggregateByWeek(sessions);
+  const enriched = detectAnomalies(weekly);
   const anomalies = enriched.filter((d) => d.isAnomaly);
+
+  if (weekly.length === 0) {
+    return (
+      <div style={{ background: "#fff", borderRadius: 14, padding: 20, boxShadow: "0 4px 16px rgba(74,50,38,0.08)" }}>
+        <h2 style={{ color: "var(--color-brown)", fontSize: "var(--font-size-lg)", marginTop: 0 }}>
+          Monthly Trend
+        </h2>
+        <p style={{ color: "var(--color-sage)" }}>Not enough session data yet.</p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ background: "#fff", borderRadius: 14, padding: 20, boxShadow: "0 4px 16px rgba(74,50,38,0.08)" }}>

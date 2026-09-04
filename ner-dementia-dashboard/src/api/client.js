@@ -43,4 +43,10 @@ export const api = {
   getSessions: (patientId, range = "week") =>
     request(`/patients/${patientId}/sessions?range=${range}`),
   getAlerts: (patientId) => request(`/patients/${patientId}/alerts`),
+  getReminders: (patientId) => request(`/patients/${patientId}/reminders`),
+  createReminder: (patientId, body) =>
+    request(`/patients/${patientId}/reminders`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
 };
