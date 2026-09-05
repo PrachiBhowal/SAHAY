@@ -80,6 +80,10 @@ export default function DailyRoutineRecall({ patient }) {
 
   function handleTryAgain() {
     setSubmittedResponse(null);
+
+    if (responseInputRef.current) {
+      responseInputRef.current.value = "";
+    }
   }
 
   return (
@@ -149,7 +153,7 @@ export default function DailyRoutineRecall({ patient }) {
 
           <div className="game3-actions">
             <button className="game3-button" type="submit">
-              Save my response
+              Finish reflection
             </button>
           </div>
         </form>
@@ -158,7 +162,7 @@ export default function DailyRoutineRecall({ patient }) {
           <h2>Thank you for sharing</h2>
 
           <p>
-            Your memory has been saved. There are no right or wrong
+            Thank you for sharing. There are no right or wrong
             answers.
           </p>
 
