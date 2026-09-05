@@ -3,6 +3,7 @@ import { useState } from 'react'
 import HomeScreen from './HomeScreen'
 import Game1FamilyRecognition from './games/Game1FamilyRecognition'
 import Game3Screen from './person3/game3/Game3Screen'
+import FamilyVoiceScreen from './person3/familyVoice/FamilyVoiceScreen'
 import './tokens.css'
 
 function App() {
@@ -14,19 +15,33 @@ function App() {
         <HomeScreen
           onSelectGame={(gameId) => setScreen(gameId)}
           onOpenReminders={() => setScreen('reminders')}
+          onOpenFamilyVoice={() => setScreen('family_voice')}
         />
       )}
 
       {screen === 'memory' && (
-        <Game1FamilyRecognition onBack={() => setScreen('home')} />
+        <Game1FamilyRecognition
+          onBack={() => setScreen('home')}
+        />
       )}
 
       {screen === 'recall' && (
         <Game3Screen onBack={() => setScreen('home')} />
       )}
 
+      {screen === 'family_voice' && (
+        <FamilyVoiceScreen
+          onBack={() => setScreen('home')}
+        />
+      )}
+
       {screen === 'reminders' && (
-        <div style={{ padding: 24, fontFamily: 'var(--font-body)' }}>
+        <div
+          style={{
+            padding: 24,
+            fontFamily: 'var(--font-body)'
+          }}
+        >
           <button
             onClick={() => setScreen('home')}
             style={{
@@ -37,7 +52,10 @@ function App() {
           >
             &#8592; Back
           </button>
-          <p>Reminders — Person 5/6's territory, stub for now.</p>
+
+          <p>
+            Reminders — Person 5/6's territory, stub for now.
+          </p>
         </div>
       )}
     </div>

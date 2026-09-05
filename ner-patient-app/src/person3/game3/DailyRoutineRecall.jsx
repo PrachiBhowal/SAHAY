@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import VoiceSupportNotice from "../components/VoiceSupportNotice";
 import { getDailyRecallPrompt } from "../config/dailyRecallPrompts";
+import { voiceLanguages } from "../config/voiceLanguages";
 import useASR from "../hooks/useASR";
 import useTTS from "../hooks/useTTS";
 import {
@@ -11,15 +12,21 @@ import extractKeywords from "../utils/extractKeywords";
 import { getVoiceSupport } from "../utils/voiceSupport";
 import "./DailyRoutineRecall.css";
 
-export default function DailyRoutineRecall({ patient }) {
-  const languageCode = patient?.language_pref || "en";
-  const prompt = getDailyRecallPrompt(languageCode);
+const gameLanguages = voiceLanguages.filter((language) =>
+  ["en", "hi", "as"].includes(language.patientCode),
+);
 
+export default function DailyRoutineRecall({ patient }) {
+  const [languageCode, setLanguageCode] = useState(
+    patient?.language_pref || "en",
+  );
   const [submittedResponse, setSubmittedResponse] = useState(null);
   const [isFallbackPlaying, setIsFallbackPlaying] =
     useState(false);
 
   const responseInputRef = useRef(null);
+
+  const prompt = getDailyRecallPrompt(languageCode);
 
   const { transcript, isListening, startListening } = useASR();
   const { speak, isSpeaking } = useTTS();
@@ -38,6 +45,17 @@ export default function DailyRoutineRecall({ patient }) {
       responseInputRef.current.value = transcript;
     }
   }, [transcript]);
+
+  function handleLanguageChange(event) {
+    const nextLanguage = event.target.value;
+
+    setLanguageCode(nextLanguage);
+    setSubmittedResponse(null);
+
+    if (responseInputRef.current) {
+      responseInputRef.current.value = "";
+    }
+  }
 
   async function handlePlayPrompt() {
     if (hasFallbackPrompt(languageCode)) {
@@ -94,6 +112,31 @@ export default function DailyRoutineRecall({ patient }) {
         Hello {patient?.name || "there"}. Take your time and tell us
         about your day.
       </p>
+
+      <div className="game3-language">
+        <label
+          className="game3-label"
+          htmlFor="game3-language-select"
+        >
+          Choose your language:
+        </label>
+
+        <select
+          className="game3-language-select"
+          id="game3-language-select"
+          value={languageCode}
+          onChange={handleLanguageChange}
+        >
+          {gameLanguages.map((language) => (
+            <option
+              key={language.patientCode}
+              value={language.patientCode}
+            >
+              {language.label}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <VoiceSupportNotice
         asrSupported={asrSupported}

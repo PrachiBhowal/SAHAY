@@ -1,0 +1,77 @@
+.family-voice-screen {
+  min-height: 100vh;
+  padding: calc(var(--spacing-unit) * 3);
+  background: var(--color-background);
+}
+
+.family-voice-back {
+  min-height: var(--touch-target-min);
+  padding: var(--spacing-unit) calc(var(--spacing-unit) * 2);
+  border: 2px solid var(--color-border-strong);
+  border-radius: 16px;
+  background: var(--color-surface);
+  color: var(--color-brown);
+  font: inherit;
+  cursor: pointer;
+}
+
+.family-voice-card {
+  width: min(100%, 760px);
+  margin: calc(var(--spacing-unit) * 3) auto;
+  padding: calc(var(--spacing-unit) * 4);
+  border: 2px solid var(--color-border);
+  border-radius: 24px;
+  background: var(--color-surface);
+}
+
+.family-voice-card h1 {
+  margin-top: 0;
+  color: var(--color-brown);
+  font-family: var(--font-display);
+  font-size: clamp(var(--font-size-xl), 6vw, 48px);
+}
+
+.family-voice-introduction {
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.family-voice-card button {
+  min-height: var(--touch-target-min);
+  padding: var(--spacing-unit) calc(var(--spacing-unit) * 3);
+  border: 0;
+  border-radius: 16px;
+  background: var(--color-terracotta);
+  color: var(--color-surface);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.family-voice-card audio {
+  display: block;
+  width: 100%;
+  margin: calc(var(--spacing-unit) * 2) 0;
+}
+
+.family-voice-status {
+  margin-top: calc(var(--spacing-unit) * 3);
+  padding: calc(var(--spacing-unit) * 2);
+  border-left: 8px solid var(--color-ochre);
+  border-radius: 12px;
+  background: var(--color-background);
+}
+
+@media (max-width: 600px) {
+  .family-voice-screen {
+    padding: calc(var(--spacing-unit) * 2);
+  }
+
+  .family-voice-card {
+    padding: calc(var(--spacing-unit) * 2);
+  }
+
+  .family-voice-card button {
+    width: 100%;
+  }
+}

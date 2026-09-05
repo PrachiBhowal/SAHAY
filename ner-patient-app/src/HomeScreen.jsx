@@ -9,7 +9,11 @@ const OTHER_ACTIVITIES = [
   { id: 'pattern', label: 'Word chain', ready: false }
 ]
 
-export default function HomeScreen({ onSelectGame, onOpenReminders }) {
+export default function HomeScreen({
+  onSelectGame,
+  onOpenReminders,
+  onOpenFamilyVoice
+}) {
   const [featuredPhoto, setFeaturedPhoto] = useState(null)
 
   useEffect(() => {
@@ -19,46 +23,81 @@ export default function HomeScreen({ onSelectGame, onOpenReminders }) {
       const assets = await getMemoryAssets(patient.id)
       const photos = assets.filter(a => a.type === 'photo')
       if (photos.length > 0) {
-        setFeaturedPhoto(photos[Math.floor(Math.random() * photos.length)])
+        setFeaturedPhoto(
+          photos[Math.floor(Math.random() * photos.length)]
+        )
       }
     }
+
     load()
   }, [])
 
   const hour = new Date().getHours()
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+  const greeting =
+    hour < 12
+      ? 'Good morning'
+      : hour < 17
+        ? 'Good afternoon'
+        : 'Good evening'
 
   return (
     <div className="home-shell">
       <p className="home-greeting">{greeting}</p>
-      <h1 className="home-headline">Let's look at some photos</h1>
+      <h1 className="home-headline">
+        Let's look at some photos
+      </h1>
 
-      <button className="home-featured-card" onClick={() => onSelectGame('memory')}>
+      <button
+        className="home-featured-card"
+        onClick={() => onSelectGame('memory')}
+      >
         {featuredPhoto && (
-          <img src={featuredPhoto.url} alt="" className="home-featured-image" />
+          <img
+            src={featuredPhoto.url}
+            alt=""
+            className="home-featured-image"
+          />
         )}
+
         <div className="home-featured-body">
-          <p className="home-featured-label">Today's activity</p>
+          <p className="home-featured-label">
+            Today's activity
+          </p>
           <p className="home-featured-title">Who is this?</p>
           <div className="home-begin-btn">Begin</div>
         </div>
       </button>
 
       <p className="home-section-label">Also today</p>
+
       <div className="home-row-list">
-        {OTHER_ACTIVITIES.map(activity => (
+        {OTHER_ACTIVITIES.map((activity) => (
           <button
             key={activity.id}
             className="home-row"
-            onClick={() => activity.ready && onSelectGame(activity.id)}
+            onClick={() =>
+              activity.ready && onSelectGame(activity.id)
+            }
             disabled={!activity.ready}
           >
             <span>{activity.label}</span>
             <span aria-hidden="true">&#8250;</span>
           </button>
         ))}
-        <button className="home-row" onClick={onOpenReminders}>
+
+        <button
+          className="home-row"
+          onClick={onOpenReminders}
+        >
           <span>Reminders</span>
+          <span aria-hidden="true">&#8250;</span>
+        </button>
+
+        <button
+          className="home-row"
+          onClick={onOpenFamilyVoice}
+        >
+          <span>Record a family voice reminder</span>
           <span aria-hidden="true">&#8250;</span>
         </button>
       </div>

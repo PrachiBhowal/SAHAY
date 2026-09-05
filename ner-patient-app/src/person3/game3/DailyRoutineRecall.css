@@ -37,6 +37,31 @@
   line-height: 1.5;
 }
 
+.game3-language {
+  margin: calc(var(--spacing-unit) * 3) 0;
+}
+
+.game3-language-select {
+  width: 100%;
+  min-height: var(--touch-target-min);
+  padding: var(--spacing-unit) calc(var(--spacing-unit) * 2);
+  border: 2px solid var(--color-border-strong);
+  border-radius: 16px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.game3-language-select:focus {
+  outline: 4px solid color-mix(
+    in srgb,
+    var(--color-ochre) 45%,
+    transparent
+  );
+  border-color: var(--color-brown);
+}
+
 .game3-prompt {
   margin: calc(var(--spacing-unit) * 3) 0;
   padding: calc(var(--spacing-unit) * 3);
