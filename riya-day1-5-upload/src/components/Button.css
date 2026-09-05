@@ -1,0 +1,57 @@
+.btn {
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  padding: 0 calc(var(--spacing-unit) * 3);
+  border-radius: 12px;
+  font-size: calc(var(--font-size-base) * var(--font-scale));
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-base), transform var(--transition-base);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--spacing-unit));
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn:focus-visible {
+  outline: 3px solid var(--color-ochre);
+  outline-offset: 3px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+}
+
+/* Primary: terracotta fill. Dark text — terracotta only clears ~2.9:1
+   against white/light text, so we use --color-on-primary (dark) instead
+   of assuming white-on-color like most design systems default to. */
+.btn--primary {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  border: none;
+}
+
+.btn--secondary {
+  background: transparent;
+  color: var(--color-brown);
+  border: 2px solid var(--color-brown);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--color-brown);
+  border: none;
+  font-weight: 500;
+}
+
+.btn--large {
+  min-height: calc(var(--touch-target-min) * 1.25);
+  font-size: calc(var(--font-size-lg) * var(--font-scale));
+  padding: 0 calc(var(--spacing-unit) * 4);
+}

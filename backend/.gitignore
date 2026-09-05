@@ -1,0 +1,8 @@
+ner-dementia-dashboard/node_modules/
+ner-dementia-dashboard/dist/
+ner-dementia-dashboard/.env
+node_modules/
+.env
+db/*.sqlite3
+db/*.sqlite3-shm
+db/*.sqlite3-wal

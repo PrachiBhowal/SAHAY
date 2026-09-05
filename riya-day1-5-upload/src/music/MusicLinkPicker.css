@@ -1,0 +1,61 @@
+.music-link-picker {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing-unit) * 2);
+  max-width: 420px;
+}
+
+.music-link-picker__prompt {
+  font-size: calc(var(--font-size-base) * var(--font-scale));
+  color: var(--color-body-text);
+  margin: 0;
+}
+
+.music-link-picker__list {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing-unit));
+}
+
+.music-link-picker__option {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing-unit) * 1.5);
+  min-height: var(--touch-target-min);
+  padding: calc(var(--spacing-unit) * 1.5);
+  border: 2px solid var(--color-brown);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.music-link-picker__option input {
+  width: 24px;
+  height: 24px;
+}
+
+.music-link-picker__option-text {
+  display: flex;
+  flex-direction: column;
+  color: var(--color-body-text);
+}
+
+.music-link-picker__option-mood {
+  font-size: calc(var(--font-size-base) * var(--font-scale) * 0.8);
+  opacity: 0.75;
+}
+
+.music-link-picker__tag-label {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing-unit));
+  font-size: calc(var(--font-size-base) * var(--font-scale) * 0.85);
+  color: var(--color-body-text);
+}
+
+.music-link-picker__tag-input {
+  min-height: var(--touch-target-min);
+  border: 2px solid var(--color-brown);
+  border-radius: 8px;
+  padding: 0 calc(var(--spacing-unit) * 1.5);
+  font-size: calc(var(--font-size-base) * var(--font-scale));
+}

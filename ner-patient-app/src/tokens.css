@@ -1,0 +1,35 @@
+/* src/tokens.css */
+:root {
+  --color-terracotta: #C77B4F;
+  --color-sage: #8A9A7B;
+  --color-ochre: #D9A441;
+  --color-brown: #6B4F3B;
+  --color-background: #FAF6F0;
+  --color-text: #3A2E24;
+  --color-text-muted: #8A7A66;
+  --color-border: #E4DACD;
+  --color-border-strong: #D8CFC0;
+  --color-surface: #FFFFFF;
+
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Source Sans 3', sans-serif;
+
+  --font-size-base: 20px;
+  --font-size-lg: 26px;
+  --font-size-xl: 32px;
+
+  --touch-target-min: 64px;
+  --spacing-unit: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+}

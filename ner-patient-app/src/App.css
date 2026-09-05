@@ -1,0 +1,8 @@
+/* src/App.css */
+.app-shell {
+  min-height: 100vh;
+  background: var(--color-background, #FAF6F0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
