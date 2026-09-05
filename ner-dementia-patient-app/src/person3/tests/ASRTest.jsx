@@ -1,10 +1,13 @@
 import { useState } from "react";
+import VoiceSupportNotice from "../components/VoiceSupportNotice";
 import { voiceLanguages } from "../config/voiceLanguages";
 import useASR from "../hooks/useASR";
+import { getVoiceSupport } from "../utils/voiceSupport";
 
 export default function ASRTest() {
   const [selectedLanguage, setSelectedLanguage] = useState("en");
   const { transcript, isListening, startListening } = useASR();
+  const { asrSupported, ttsSupported } = getVoiceSupport();
 
   function handleLanguageChange(event) {
     const languageCode = event.target.value;
@@ -16,6 +19,11 @@ export default function ASRTest() {
   return (
     <main>
       <h1>SAHAY Multilingual Voice Test</h1>
+
+      <VoiceSupportNotice
+        asrSupported={asrSupported}
+        ttsSupported={ttsSupported}
+      />
 
       <label htmlFor="voice-language">
         Select the patient’s language:
@@ -41,7 +49,7 @@ export default function ASRTest() {
       <button
         type="button"
         onClick={startListening}
-        disabled={isListening}
+        disabled={isListening || !asrSupported}
       >
         {isListening ? "Listening..." : "Start speaking"}
       </button>
