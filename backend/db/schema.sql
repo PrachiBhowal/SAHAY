@@ -38,10 +38,10 @@ CREATE TABLE IF NOT EXISTS game_sessions (
   patient_id        TEXT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
   game_type         TEXT NOT NULL CHECK (game_type IN ('memory','attention','recall','pattern')),
   timestamp         TEXT NOT NULL,
-  accuracy          REAL NOT NULL,
-  response_time_ms  INTEGER NOT NULL,
-  hints_used        INTEGER NOT NULL DEFAULT 0,
-  difficulty_tier   INTEGER NOT NULL,
+  accuracy          REAL NOT NULL CHECK (accuracy > 0 AND accuracy <= 1),
+  response_time_ms  INTEGER NOT NULL CHECK (response_time_ms >= 0),
+  hints_used        INTEGER NOT NULL DEFAULT 0 CHECK (hints_used >= 0),
+  difficulty_tier   INTEGER NOT NULL CHECK (difficulty_tier BETWEEN 1 AND 5),
   synced            INTEGER NOT NULL DEFAULT 1
 );
 
