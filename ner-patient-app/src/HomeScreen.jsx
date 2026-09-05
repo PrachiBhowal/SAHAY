@@ -5,7 +5,7 @@ import './HomeScreen.css'
 
 const OTHER_ACTIVITIES = [
   { id: 'attention', label: 'Spot what changed', ready: false },
-  { id: 'recall', label: 'Tell us about your day', ready: false },
+  { id: 'recall', label: 'Tell us about your day', ready: true },
   { id: 'pattern', label: 'Word chain', ready: false }
 ]
 
