@@ -1,6 +1,16 @@
+// middleware/auth.js
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  // Fail at server startup, not on the first login attempt during the demo.
+  // A crash here points straight at the .env file; a crash inside
+  // jwt.sign() during a live login just looks like "the app is broken."
+  throw new Error(
+    "JWT_SECRET is not set. Check that .env exists and is loaded (see env.example) before starting the server."
+  );
+}
 
 export function signToken(user) {
   // user: { id, role, email }
