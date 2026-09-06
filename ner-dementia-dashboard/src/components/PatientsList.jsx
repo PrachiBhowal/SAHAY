@@ -67,7 +67,14 @@ export default function PatientsList({ patients = [], activePatientId, onSelect 
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ fontWeight: 700, fontSize: 17 }}>{p.name}</span>
-                  <span style={styles.patientId}>ID: {p.id}</span>
+                  <span
+                    style={{
+                      ...styles.patientId,
+                      color: isActive ? "rgba(255, 255, 255, 0.86)" : styles.patientId.color,
+                    }}
+                  >
+                    ID: {p.id}
+                  </span>
                   {openAlerts > 0 && (
                     <span
                       style={{
