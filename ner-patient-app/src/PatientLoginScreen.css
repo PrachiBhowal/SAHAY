@@ -1,0 +1,198 @@
+.patient-login-screen {
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: 32px 20px;
+    box-sizing: border-box;
+    background: var(--color-background, #faf6f0);
+}
+
+.patient-login-panel {
+    width: min(100%, 520px);
+    padding: 34px;
+    box-sizing: border-box;
+    border: 1px solid var(--color-border, #e3d9cc);
+    border-radius: 18px;
+    background: var(--color-surface, #fffdf9);
+    box-shadow: 0 16px 40px rgba(74, 50, 38, 0.1);
+    text-align: left;
+}
+
+.patient-login-mark {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--color-ochre, #d9a441);
+    color: #fffdf9;
+    font-size: 26px;
+    font-weight: 800;
+}
+
+.patient-login-kicker {
+    margin-top: 18px;
+    color: var(--color-ochre-dark, #8c641b);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+}
+
+.patient-login-panel h1 {
+    margin: 6px 0 8px;
+    font-size: clamp(28px, 7vw, 42px);
+    line-height: 1.1;
+}
+
+.patient-login-intro {
+    color: var(--color-text-muted, #756b63);
+}
+
+.patient-choice-list {
+    display: grid;
+    gap: 10px;
+    margin: 28px 0 22px;
+    padding: 0;
+    border: 0;
+}
+
+.patient-choice-list legend,
+.access-code-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--color-text, #3f352e);
+    font-weight: 700;
+}
+
+.patient-choice {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 64px;
+    padding: 10px 14px;
+    border: 2px solid var(--color-border, #e3d9cc);
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.patient-choice.is-selected {
+    border-color: var(--color-ochre, #d9a441);
+    background: rgba(217, 164, 65, 0.1);
+}
+
+.patient-choice input {
+    accent-color: var(--color-ochre, #d9a441);
+}
+
+.patient-choice span {
+    display: grid;
+    gap: 2px;
+}
+
+.patient-choice small {
+    color: var(--color-text-muted, #756b63);
+}
+
+.access-code-input {
+    width: 100%;
+    min-height: 52px;
+    box-sizing: border-box;
+    padding: 10px 14px;
+    border: 2px solid var(--color-border, #e3d9cc);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--color-text, #3f352e);
+    font: inherit;
+    letter-spacing: 0.12em;
+}
+
+.patient-login-panel form {
+    display: grid;
+    gap: 9px;
+    margin-top: 24px;
+}
+
+.patient-login-panel form .access-code-label {
+    margin-top: 4px;
+}
+
+.patient-login-panel select.access-code-input {
+    letter-spacing: 0;
+}
+
+.patient-created-id {
+    display: grid;
+    gap: 4px;
+    margin-top: 24px;
+    padding: 14px 16px;
+    border: 1px solid var(--color-border, #e3d9cc);
+    border-radius: 10px;
+    background: rgba(217, 164, 65, 0.1);
+}
+
+.patient-created-id span {
+    color: var(--color-text-muted, #756b63);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.patient-created-id strong {
+    color: var(--color-terracotta, #c77b4f);
+    overflow-wrap: anywhere;
+    font-size: 18px;
+}
+
+.patient-login-toggle {
+    display: block;
+    min-height: 44px;
+    margin: 10px auto 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-terracotta, #c77b4f);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.access-code-input:focus {
+    outline: 3px solid rgba(217, 164, 65, 0.28);
+    border-color: var(--color-ochre, #d9a441);
+}
+
+.patient-login-submit {
+    width: 100%;
+    min-height: 52px;
+    margin-top: 18px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--color-ochre, #d9a441);
+    color: #fffdf9;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.patient-login-submit:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.patient-login-error {
+    margin-top: 12px;
+    color: #a13b31;
+    font-weight: 700;
+}
+
+.patient-login-status {
+    margin-top: 28px;
+    color: var(--color-text-muted, #756b63);
+}
+
+@media (max-width: 480px) {
+    .patient-login-panel {
+        padding: 24px 20px;
+    }
+}

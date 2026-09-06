@@ -23,6 +23,8 @@
   /* Alias for any component still using the old dashboard-only name */
   --color-charcoal: var(--color-text);
 
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Source Sans 3', 'Trebuchet MS', sans-serif;
   --font-size-base: 20px;
   --font-size-lg: 26px;
   --font-size-xl: 32px;
@@ -36,7 +38,7 @@ body {
   background: var(--color-background);
   color: var(--color-text);
   font-size: var(--font-size-base);
-  font-family: system-ui, sans-serif;
+  font-family: var(--font-body);
   margin: 0;
 }
 

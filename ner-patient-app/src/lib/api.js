@@ -31,14 +31,27 @@ async function request(path, options = {}) {
 }
 
 export const api = {
-  async loginPatient(patientId) {
-    const deviceToken = import.meta.env.VITE_PATIENT_DEVICE_TOKEN || `patient-demo-token-${patientId}`
+  async loginPatient(patientId, accessCode) {
     const data = await request('/auth/patient-login', {
       method: 'POST',
-      body: JSON.stringify({ patient_id: patientId, device_token: deviceToken })
+      body: JSON.stringify({ patient_id: patientId, access_code: accessCode })
     })
     window.localStorage.setItem(TOKEN_KEY, data.token)
     return data
+  },
+  async signupPatient(profile) {
+    const data = await request('/auth/patient-signup', {
+      method: 'POST',
+      body: JSON.stringify(profile)
+    })
+    window.localStorage.setItem(TOKEN_KEY, data.token)
+    return data
+  },
+  async linkCaregiver(caregiverCode) {
+    return request('/auth/link-caregiver', {
+      method: 'POST',
+      body: JSON.stringify({ caregiver_code: caregiverCode })
+    })
   },
   getAvailablePatients: () => request('/auth/available-patients'),
   getPatient: (patientId) => request(`/patients/${patientId}`),
@@ -52,4 +65,4 @@ export const api = {
     method: 'PATCH',
     body: JSON.stringify({ difficulty_tiers: difficultyTiers })
   })
-}
+}

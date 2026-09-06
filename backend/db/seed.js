@@ -7,14 +7,14 @@ import { pool, initSchema } from "./index.js";
 // data is a drop-in change, not a rewrite.
 
 const patients = [
-  { id: "p1", name: "Rina Devi", language_pref: "as", region_village: "Nagaon, Assam" },
-  { id: "p2", name: "Bipul Saikia", language_pref: "as", region_village: "Jorhat, Assam" },
-  { id: "p3", name: "Anima Baruah", language_pref: "as", region_village: "Sivasagar, Assam" },
+  { id: "p1", name: "Rina Devi", language_pref: "as", region_village: "Nagaon, Assam", access_code: "2468" },
+  { id: "p2", name: "Bipul Saikia", language_pref: "as", region_village: "Jorhat, Assam", access_code: "1357" },
+  { id: "p3", name: "Anima Baruah", language_pref: "as", region_village: "Sivasagar, Assam", access_code: "8642" },
 ];
 
 const caregivers = [
-  { id: "caregiver-1", name: "Family Member", email: "family@sahay.demo", password: "demo1234", role: "family" },
-  { id: "asha-1", name: "ASHA Worker", email: "asha@sahay.demo", password: "demo1234", role: "asha_worker" },
+  { id: "caregiver-1", name: "Family Member", email: "family@sahay.demo", password: "demo1234", role: "family", caregiver_code: "CG-FAMILY-1" },
+  { id: "asha-1", name: "ASHA Worker", email: "asha@sahay.demo", password: "demo1234", role: "asha_worker", caregiver_code: "CG-ASHA-1" },
 ];
 
 async function seed() {
@@ -31,17 +31,17 @@ async function seed() {
       [p.id, p.name, p.language_pref, p.region_village, new Date().toISOString()]
     );
     await pool.query(
-      "UPDATE patients SET device_token_hash = $1 WHERE id = $2 AND device_token_hash IS NULL",
-      [bcrypt.hashSync(`patient-demo-token-${p.id}`, 10), p.id]
+      "UPDATE patients SET access_code_hash = $1 WHERE id = $2 AND access_code_hash IS NULL",
+      [bcrypt.hashSync(p.access_code, 10), p.id]
     );
   }
 
   for (const c of caregivers) {
     await pool.query(
-      `INSERT INTO caregivers (id, name, email, password_hash, role, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO caregivers (id, name, email, caregiver_code, password_hash, role, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        ON CONFLICT (id) DO NOTHING`,
-      [c.id, c.name, c.email, bcrypt.hashSync(c.password, 10), c.role, new Date().toISOString()]
+      [c.id, c.name, c.email, c.caregiver_code, bcrypt.hashSync(c.password, 10), c.role, new Date().toISOString()]
     );
   }
 
@@ -61,7 +61,9 @@ async function seed() {
   console.log("Seeded patients, caregivers, and links.");
   console.log("Login with: family@sahay.demo / demo1234 (role: family)");
   console.log("        or: asha@sahay.demo / demo1234 (role: asha_worker)");
+  console.log("Caregiver codes: family=CG-FAMILY-1, ASHA=CG-ASHA-1");
   console.log("Patient demo token for p1: patient-demo-token-p1");
+  console.log("Patient access codes: p1=2468, p2=1357, p3=8642");
   await pool.end();
 }
 

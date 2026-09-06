@@ -12,20 +12,26 @@ CREATE TABLE IF NOT EXISTS patients (
   difficulty_attention  INTEGER NOT NULL DEFAULT 2,
   difficulty_recall     INTEGER NOT NULL DEFAULT 2,
   difficulty_pattern    INTEGER NOT NULL DEFAULT 2,
+  access_code_hash      TEXT,
   device_token_hash     TEXT,
   created_at            TEXT NOT NULL
 );
 
 ALTER TABLE patients ADD COLUMN IF NOT EXISTS device_token_hash TEXT;
+ALTER TABLE patients ADD COLUMN IF NOT EXISTS access_code_hash TEXT;
 
 CREATE TABLE IF NOT EXISTS caregivers (
   id            TEXT PRIMARY KEY,
   name          TEXT NOT NULL,
   email         TEXT UNIQUE NOT NULL,
+  caregiver_code TEXT,
   password_hash TEXT NOT NULL,
   role          TEXT NOT NULL CHECK (role IN ('family','asha_worker')),
   created_at    TEXT NOT NULL
 );
+
+ALTER TABLE caregivers ADD COLUMN IF NOT EXISTS caregiver_code TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS caregivers_caregiver_code_idx ON caregivers(caregiver_code) WHERE caregiver_code IS NOT NULL;
 
 -- many-to-many: caregiver.linked_patient_ids
 CREATE TABLE IF NOT EXISTS caregiver_patients (

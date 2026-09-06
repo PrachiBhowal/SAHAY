@@ -12,7 +12,7 @@ import AndroidAppBar from './components/AndroidAppBar'
 import AndroidBottomNav from './components/AndroidBottomNav'
 import CaregiverPortalModal from './components/CaregiverPortalModal'
 import { getPatientData, clearActivePatient, setActivePatientId, getPendingSyncItems, clearSyncQueueItem } from './lib/localStorage'
-import { getAuthToken, api } from './lib/api'
+import { getAuthToken, clearAuthToken, api } from './lib/api'
 import { ComfortTriggerContainer } from './shared/ComfortTrigger.jsx'
 import './tokens.css'
 import './App.css'
@@ -42,10 +42,12 @@ function App() {
       const urlParams = new URLSearchParams(window.location.search)
       const paramPatientId = urlParams.get('patientId')
 
-      if (paramPatientId) {
-        setActivePatientId(paramPatientId)
+      if (!getAuthToken()) {
+        setBootstrapping(false)
+        return
       }
 
+      if (paramPatientId) setActivePatientId(paramPatientId)
       const p = await getPatientData(paramPatientId || undefined)
       if (p) {
         setPatient(p)
@@ -105,6 +107,7 @@ function App() {
   }
 
   function handleSwitchPatient() {
+    clearAuthToken()
     clearActivePatient()
     setPatient(null)
     setPatientId(undefined)

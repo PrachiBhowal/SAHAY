@@ -13,6 +13,7 @@ const ITEMS = [
   'A woven basket', 'A blue cup', 'A green leaf', 'A brass bell', 'A red shawl',
   'A clay pot', 'A wooden comb', 'A palm fan', 'A brass lamp', 'A cotton scarf'
 ]
+const MIN_CHOICE_COUNT = 3
 
 function shuffled(items) {
   return [...items].sort(() => Math.random() - 0.5)
@@ -49,7 +50,7 @@ export default function AttentionGame({ onBack }) {
     // distractors, no matter how large ITEMS grows or shrinks later —
     // this guard is the actual fix, the bigger bank just makes it easy
     // to satisfy at every tier we currently define.
-    const maxShowable = Math.max(1, ITEMS.length - 2)
+    const maxShowable = Math.max(1, ITEMS.length - (MIN_CHOICE_COUNT - 1))
     const desiredShown = 3 + Math.min(currentTier - 1, 2)
     const shownCount = Math.min(desiredShown, maxShowable)
 
@@ -61,8 +62,7 @@ export default function AttentionGame({ onBack }) {
     setMissingItem(missing)
 
     const outsidePool = ITEMS.filter(item => !first.includes(item))
-    const numDistractors = Math.min(2, outsidePool.length)
-    const distractors = shuffled(outsidePool).slice(0, numDistractors)
+    const distractors = shuffled(outsidePool).slice(0, MIN_CHOICE_COUNT - 1)
     setChoices(shuffled([missing, ...distractors]))
 
     setPhase('view')

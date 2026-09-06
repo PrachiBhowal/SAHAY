@@ -138,8 +138,22 @@ POST   /auth/login
   returns: { token, user: { id, role, ... } }
 
 POST   /auth/patient-login
-  body: { patient_id, device_token }
+  body: { patient_id, access_code }
   returns: { token, user: { id, role: "patient", patient_id, ... } }
+
+POST   /auth/patient-signup
+  body: { name, language_pref, region_village, access_code, caregiver_code? }
+  returns: { token, user, patient_id, access_code, linked_caregiver }
+
+POST   /auth/link-patient
+  auth: caregiver token
+  body: { patient_id }
+  returns: { patient_id, linked: true }
+
+POST   /auth/link-caregiver
+  auth: patient token
+  body: { caregiver_code }
+  returns: { caregiver_id, caregiver_code, linked: true }
 
 GET    /patients/:id
   returns: Patient

@@ -6,6 +6,7 @@ import PatientOverview from "./components/PatientOverview";
 import RemindersPanel from "./components/RemindersPanel";
 import PatientsList from "./components/PatientsList";
 import AlertsPanel from "./components/AlertsPanel";
+import "./styles/dashboard.css";
 
 const WeeklyGameTypeChart = lazy(() => import("./components/WeeklyGameTypeChart"));
 const MonthlyAnalyticsChart = lazy(() => import("./components/MonthlyAnalyticsChart"));
@@ -34,6 +35,60 @@ function sameDifficultyTiers(left, right) {
 }
 
 const PATIENT_APP_URL = import.meta.env.VITE_PATIENT_APP_URL || "http://localhost:5173";
+
+function LinkPatientCard({ user, onLinked, onLogout }) {
+  const [patientId, setPatientId] = useState("");
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    const normalizedId = patientId.trim();
+    if (!normalizedId) return;
+    setSaving(true);
+    setError("");
+    try {
+      await api.linkPatient(normalizedId);
+      const patient = await api.getPatient(normalizedId);
+      onLinked(patient);
+    } catch (linkError) {
+      setError(linkError.message || "We could not add that patient.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <main className="dashboard-empty-screen">
+      <section className="dashboard-empty-panel">
+        <div className="dashboard-brand-mark">S</div>
+        <p className="dashboard-eyebrow">SAHAY caregiver space</p>
+        <h1 className="dashboard-welcome">Welcome, {user.name || "caregiver"}</h1>
+        <p className="dashboard-empty-copy">Add a patient to begin following their activities and reminders.</p>
+        <div className="dashboard-account-code">
+          <span>Your caregiver code</span>
+          <strong>{user.caregiver_code || "Loading..."}</strong>
+          <small>Share this code with a patient so they can connect their account to yours.</small>
+        </div>
+        <form className="dashboard-link-form" onSubmit={handleSubmit}>
+          <label htmlFor="new-patient-id">Patient ID</label>
+          <input
+            id="new-patient-id"
+            value={patientId}
+            onChange={(event) => setPatientId(event.target.value)}
+            placeholder="patient-..."
+            autoComplete="off"
+          />
+          {error && <p className="dashboard-error" role="alert">{error}</p>}
+          <button type="submit" className="dashboard-launch-button" disabled={saving || !patientId.trim()}>
+            {saving ? "Adding patient..." : "Add patient"}
+          </button>
+        </form>
+        <button type="button" className="dashboard-empty-signout" onClick={onLogout}>Sign out</button>
+      </section>
+    </main>
+  );
+}
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -109,7 +164,18 @@ export default function App() {
   }, [activePatient]);
 
   if (!user) return <Login onLogin={setUser} />;
-  if (!activePatient) return <div style={styles.main}>Loading patients…</div>;
+  if (!activePatient) {
+    return (
+      <LinkPatientCard
+        user={user}
+        onLinked={(patient) => {
+          setPatients([patient]);
+          setActivePatient(patient);
+        }}
+        onLogout={handleLogout}
+      />
+    );
+  }
 
   const isAsha = user.role === "asha_worker";
 
@@ -139,78 +205,79 @@ export default function App() {
   }
 
   return (
-    <div style={styles.shell}>
-      <aside style={styles.sidebar}>
-        <div style={styles.sidebarBrand}>SAHAY</div>
-        <div style={styles.sidebarTagline}>NER Dementia Care</div>
+    <div className="dashboard-shell">
+      <aside className="dashboard-sidebar">
+        <div className="dashboard-brand-mark">S</div>
+        <div className="dashboard-brand">SAHAY</div>
+        <div className="dashboard-sidebar-tagline">Caregiver companion</div>
 
-        <nav style={styles.nav}>
+        <nav className="dashboard-nav" aria-label="Dashboard sections">
           {navItems.map((item) => (
             <button
               key={item.id}
               type="button"
               onClick={() => setActiveTab(item.id)}
-              style={{
-                ...styles.navItem,
-                ...(activeTab === item.id ? styles.navItemActive : {}),
-              }}
+              className={`dashboard-nav-item ${activeTab === item.id ? "is-active" : ""}`}
             >
+              <span className="dashboard-nav-icon" aria-hidden="true">{item.id === "overview" ? "⌂" : item.id === "reminders" ? "◷" : item.id === "alerts" ? "!" : "●"}</span>
               {item.label}
             </button>
           ))}
         </nav>
 
-        <div style={styles.logoutWrapper}>
+        <div className="dashboard-sidebar-footer">
           <a
             href={`${PATIENT_APP_URL}/?patientId=${activePatient.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            style={styles.sidebarPatientLink}
+            className="dashboard-patient-link"
           >
-            🎮 Open Patient App ↗
+            Open Patient App <span aria-hidden="true">↗</span>
           </a>
-          <button type="button" onClick={handleLogout} style={styles.logoutButton}>
-            Log Out
+          <button type="button" onClick={handleLogout} className="dashboard-logout-button">
+            Sign out
           </button>
         </div>
       </aside>
 
-      <main style={styles.main}>
-        <header style={styles.header}>
+      <main className="dashboard-main">
+        <header className="dashboard-header">
           <div>
-            <h1 style={styles.welcome}>Welcome, {user.name || user.role}</h1>
-            <p style={{ margin: "4px 0 0", color: "var(--color-sage)", fontSize: 14 }}>
+            <p className="dashboard-eyebrow">{isAsha ? "ASHA health worker" : "Family caregiver"}</p>
+            <h1 className="dashboard-welcome">Welcome, {user.name || user.role}</h1>
+            <p className="dashboard-subtitle">
               {isAsha ? "ASHA Health Worker Portal" : "Family Caregiver Portal"}
             </p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={styles.badge}>Patient: {activePatient.name}</div>
+          <div className="dashboard-header-actions">
+            <div className="dashboard-account-code"><span>Caregiver code</span><strong>{user.caregiver_code}</strong></div>
+            <div className="dashboard-patient-badge"><span>Viewing</span>{activePatient.name}</div>
             <a
               href={`${PATIENT_APP_URL}/?patientId=${activePatient.id}`}
               target="_blank"
               rel="noopener noreferrer"
-              style={styles.launchBtn}
+              className="dashboard-launch-button"
               title={`Launch SAHAY Patient App for ${activePatient.name}`}
             >
-              🎮 Open Patient Mode ↗
+              Open Patient Mode <span aria-hidden="true">↗</span>
             </a>
           </div>
         </header>
 
 
         {sessionsError && (
-          <p style={{ color: "#B23A2F", marginBottom: 16 }}>
-            Couldn't load session data: {sessionsError}
+          <p className="dashboard-error" role="alert">
+            Could not load session data: {sessionsError}
           </p>
         )}
 
         {activeTab === "overview" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="dashboard-content-stack">
             <PatientOverview patient={activePatient} lastActive={lastActive} />
             {sessionsLoading ? (
-              <p style={{ color: "var(--color-sage)" }}>Loading charts…</p>
+              <p className="dashboard-status">Loading charts...</p>
             ) : (
-              <Suspense fallback={<p style={{ color: "var(--color-sage)" }}>Preparing charts…</p>}>
+              <Suspense fallback={<p className="dashboard-status">Preparing charts...</p>}>
                 <WeeklyGameTypeChart sessions={weeklySessions} />
                 <MonthlyAnalyticsChart sessions={monthlySessions} />
                 <EngagementChart sessions={weeklySessions} />
@@ -233,115 +300,19 @@ export default function App() {
           <PatientsList patients={patients} activePatientId={activePatient.id} onSelect={handleSelectPatient} />
         )}
       </main>
+      <nav className="dashboard-bottom-nav" aria-label="Dashboard sections">
+        {navItems.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => setActiveTab(item.id)}
+            className={`dashboard-bottom-nav-item ${activeTab === item.id ? "is-active" : ""}`}
+          >
+            <span className="dashboard-nav-icon" aria-hidden="true">{item.id === "overview" ? "⌂" : item.id === "reminders" ? "◷" : item.id === "alerts" ? "!" : "●"}</span>
+            {item.label}
+          </button>
+        ))}
+      </nav>
     </div>
   );
 }
-
-const styles = {
-  shell: { display: "flex", minHeight: "100vh" },
-  sidebar: {
-    width: 220,
-    background: "var(--color-brown)",
-    color: "#fff",
-    padding: "24px 16px",
-    display: "flex",
-    flexDirection: "column",
-    minHeight: "100vh",
-  },
-  sidebarBrand: {
-    fontSize: 22,
-    fontWeight: 700,
-    marginBottom: 8,
-    color: "var(--color-ochre)",
-  },
-  sidebarTagline: {
-    color: "var(--color-sage)",
-    fontSize: 12,
-    marginBottom: 24,
-  },
-  nav: { display: "flex", flexDirection: "column", gap: 8 },
-  navItem: {
-    border: "none",
-    textAlign: "left",
-    width: "100%",
-    background: "transparent",
-    padding: "12px 14px",
-    borderRadius: 8,
-    cursor: "pointer",
-    fontSize: 16,
-  },
-  navItemActive: {
-    background: "var(--color-terracotta)",
-    fontWeight: 600,
-  },
-  logoutWrapper: {
-    marginTop: "auto",
-    paddingTop: 16,
-    borderTop: "1px solid rgba(255,255,255,0.15)",
-  },
-  logoutButton: {
-    border: "none",
-    background: "transparent",
-    width: "100%",
-    textAlign: "left",
-    padding: "12px 14px",
-    borderRadius: 8,
-    cursor: "pointer",
-    fontSize: 16,
-    color: "var(--color-ochre)",
-    fontWeight: 600,
-  },
-  sidebarPatientLink: {
-    display: "block",
-    padding: "10px 14px",
-    marginBottom: 8,
-    borderRadius: 8,
-    background: "rgba(217, 164, 65, 0.15)",
-    border: "1px solid var(--color-ochre)",
-    color: "var(--color-ochre)",
-    textDecoration: "none",
-    fontSize: 14,
-    fontWeight: 700,
-    textAlign: "center",
-  },
-  launchBtn: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 6,
-    background: "var(--color-terracotta)",
-    color: "#fff",
-    padding: "8px 16px",
-    borderRadius: 20,
-    fontSize: 14,
-    fontWeight: 700,
-    textDecoration: "none",
-    boxShadow: "0 2px 8px rgba(199, 123, 79, 0.3)",
-    transition: "transform 0.15s ease",
-  },
-  main: { flex: 1, padding: 32 },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
-    flexWrap: "wrap",
-    gap: 16,
-  },
-  welcome: { color: "var(--color-brown)", fontSize: "var(--font-size-xl)", margin: 0 },
-  badge: {
-    background: "var(--color-sage)",
-    color: "#fff",
-    padding: "8px 16px",
-    borderRadius: 20,
-    fontSize: 14,
-    fontWeight: 600,
-  },
-
-  placeholderCard: {
-    background: "#fff",
-    borderRadius: 14,
-    padding: 40,
-    textAlign: "center",
-    boxShadow: "0 4px 16px rgba(74,50,38,0.08)",
-  },
-};

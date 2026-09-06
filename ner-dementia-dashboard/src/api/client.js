@@ -44,6 +44,10 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ name, email, password, role }),
     }),
+  linkPatient: (patientId) => request("/auth/link-patient", {
+    method: "POST",
+    body: JSON.stringify({ patient_id: patientId }),
+  }),
   getPatient: (patientId) => request(`/patients/${patientId}`),
   updatePatient: (patientId, difficultyTiers) => request(`/patients/${patientId}`, {
     method: "PATCH",

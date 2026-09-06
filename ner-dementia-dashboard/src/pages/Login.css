@@ -1,0 +1,146 @@
+.caregiver-login-screen {
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    padding: 28px 18px;
+    background: var(--color-background);
+}
+
+.caregiver-login-panel {
+    width: min(100%, 520px);
+    padding: 34px;
+    border: 1px solid var(--color-border);
+    border-radius: 18px;
+    background: var(--color-surface);
+    box-shadow: 0 16px 40px rgba(74, 50, 38, .1);
+}
+
+.caregiver-login-mark {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--color-ochre);
+    color: #fffaf2;
+    font-size: 26px;
+    font-weight: 800;
+}
+
+.caregiver-login-kicker {
+    margin: 18px 0 4px;
+    color: var(--color-ochre);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: .14em;
+}
+
+.caregiver-login-title {
+    margin: 0;
+    color: var(--color-brown);
+    font-family: var(--font-display);
+    font-size: clamp(30px, 7vw, 44px);
+    font-weight: 500;
+    line-height: 1.1;
+}
+
+.caregiver-login-subtitle {
+    margin: 10px 0 26px;
+    color: var(--color-text-muted);
+}
+
+.caregiver-login-form {
+    display: grid;
+    gap: 9px;
+}
+
+.caregiver-login-form label {
+    color: var(--color-brown);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.caregiver-login-form input,
+.caregiver-login-form select {
+    width: 100%;
+    min-height: 56px;
+    padding: 0 14px;
+    border: 2px solid var(--color-border-strong);
+    border-radius: 10px;
+    background: var(--color-background);
+    color: var(--color-text);
+    font: inherit;
+}
+
+.caregiver-login-form input:focus,
+.caregiver-login-form select:focus {
+    outline: 3px solid rgba(217, 164, 65, .28);
+    border-color: var(--color-ochre);
+}
+
+.caregiver-login-hint {
+    margin-top: -3px;
+    color: var(--color-text-muted);
+    font-size: 13px;
+}
+
+.caregiver-login-error {
+    margin: 4px 0;
+    padding: 11px 13px;
+    border-left: 4px solid #b23a2f;
+    border-radius: 7px;
+    background: #fff1ed;
+    color: #8f2f27;
+    font-size: 14px;
+}
+
+.caregiver-login-submit {
+    min-height: 56px;
+    margin-top: 10px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--color-terracotta);
+    color: #fff;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.caregiver-login-submit:disabled {
+    cursor: wait;
+    opacity: .65;
+}
+
+.caregiver-login-toggle {
+    min-height: 40px;
+    border: 0;
+    background: transparent;
+    color: var(--color-terracotta);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.caregiver-patient-link {
+    display: grid;
+    gap: 5px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-size: 14px;
+    text-align: center;
+}
+
+.caregiver-patient-link a {
+    color: var(--color-terracotta);
+    font-weight: 800;
+    text-decoration: none;
+}
+
+@media (max-width: 480px) {
+    .caregiver-login-panel {
+        padding: 26px 20px;
+    }
+}

@@ -1,5 +1,5 @@
 // src/games/Game1FamilyRecognition.jsx
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { saveSession, getPatientData, getMemoryAssets } from '../lib/localStorage'
 import { getAuthToken } from '../lib/api'
 import { useASR } from '../hooks/useASR'
@@ -16,6 +16,58 @@ function modeForTier(tier) {
   return tier <= 2 ? 'voice_recall' : 'multiple_choice'
 }
 
+function photoName(photo) {
+  const tags = Array.isArray(photo?.tags)
+    ? photo.tags
+    : typeof photo?.tags === 'string'
+      ? (() => {
+        try { return JSON.parse(photo.tags) } catch { return [photo.tags] }
+      })()
+      : []
+  return String(tags[0] || '').trim()
+}
+
+function normalizeSpokenText(value) {
+  return String(value || '')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLocaleLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim()
+}
+
+function editDistance(left, right) {
+  const row = Array.from({ length: right.length + 1 }, (_, index) => index)
+  for (let leftIndex = 1; leftIndex <= left.length; leftIndex += 1) {
+    let diagonal = row[0]
+    row[0] = leftIndex
+    for (let rightIndex = 1; rightIndex <= right.length; rightIndex += 1) {
+      const above = row[rightIndex]
+      row[rightIndex] = left[leftIndex - 1] === right[rightIndex - 1]
+        ? diagonal
+        : Math.min(diagonal + 1, row[rightIndex] + 1, row[rightIndex - 1] + 1)
+      diagonal = above
+    }
+  }
+  return row[right.length]
+}
+
+function matchesSpokenName(spoken, expected) {
+  const spokenText = normalizeSpokenText(spoken)
+  const expectedText = normalizeSpokenText(expected)
+  if (!spokenText || !expectedText) return false
+  if (spokenText.includes(expectedText)) return true
+
+  const spokenWords = spokenText.split(' ')
+  return expectedText.split(' ').some(expectedWord =>
+    spokenWords.some(spokenWord => {
+      if (spokenWord === expectedWord) return true
+      const allowedDistance = expectedWord.length >= 6 ? 2 : 1
+      return expectedWord.length >= 4 && editDistance(spokenWord, expectedWord) <= allowedDistance
+    })
+  )
+}
+
 export default function Game1FamilyRecognition({ onBack, onComfortReady }) {
   const [patient, setPatient] = useState(null)
   const [tier, setTier] = useState(2)
@@ -27,6 +79,7 @@ export default function Game1FamilyRecognition({ onBack, onComfortReady }) {
   const [hintsUsed, setHintsUsed] = useState(0)
   const [redirectMessage, setRedirectMessage] = useState('Take your time.')
   const { transcript, interimTranscript, isListening, isReady, startListening, stopListening } = useASR()
+  const processedTranscript = useRef('')
   const showComfort = useComfortTrigger() || onComfortReady
 
   useEffect(() => {
@@ -52,12 +105,13 @@ export default function Game1FamilyRecognition({ onBack, onComfortReady }) {
     // for exactly this) and check whether the correct name appears
     // among them, in the patient's actual language rather than a
     // hardcoded "en".
-    if (!transcript || !currentPhoto) return
-    const correctName = currentPhoto.tags[0].toLowerCase().trim()
+    if (!transcript || transcript === processedTranscript.current || !currentPhoto) return
+    processedTranscript.current = transcript
+    const correctName = photoName(currentPhoto)
     const keywords = extractKeywords(transcript, patient?.language_pref || 'en')
-    const matched = keywords.some(word => word === correctName || correctName.includes(word) || word.includes(correctName))
-    handleAnswer(matched ? correctName : transcript.toLowerCase().trim(), correctName)
-  }, [transcript, currentPhoto?.id])
+    const matched = matchesSpokenName(transcript, correctName) || keywords.some(word => matchesSpokenName(word, correctName))
+    handleAnswer(matched ? correctName : transcript, correctName)
+  }, [transcript])
 
   useEffect(() => {
     if (!sessionStart || !currentPhoto) return undefined
@@ -81,7 +135,8 @@ export default function Game1FamilyRecognition({ onBack, onComfortReady }) {
 
     // Works whether we have 4+ photos or fewer — never silently stalls.
     const distractors = shuffled
-      .filter(p => p.id !== target.id)
+      .filter(p => p.id !== target.id && photoName(p))
+      .filter((photo, index, all) => all.findIndex(candidate => photoName(candidate).toLowerCase() === photoName(photo).toLowerCase()) === index)
       .slice(0, Math.min(3, shuffled.length - 1))
 
     setCurrentPhoto(target)
@@ -93,7 +148,7 @@ export default function Game1FamilyRecognition({ onBack, onComfortReady }) {
   }
 
   async function handleAnswer(selectedName, correctName) {
-    const isCorrect = selectedName === correctName
+    const isCorrect = normalizeSpokenText(selectedName) === normalizeSpokenText(correctName)
     const responseTimeMs = Date.now() - sessionStart
 
     if (!isCorrect) {
@@ -147,7 +202,11 @@ export default function Game1FamilyRecognition({ onBack, onComfortReady }) {
   // to multiple-choice rather than showing a mic button that does nothing —
   // a dead control is worse than a mode switch the patient never notices.
   const requestedMode = patient ? modeForTier(tier) : null
-  const mode = requestedMode === 'voice_recall' && !isReady ? 'multiple_choice' : requestedMode
+  const labeledPhotoCount = new Set(photos.map(photoName).filter(Boolean).map(name => normalizeSpokenText(name))).size
+  const needsVoiceBecauseChoicesAreSparse = requestedMode === 'multiple_choice' && labeledPhotoCount < 3
+  const mode = (requestedMode === 'voice_recall' || needsVoiceBecauseChoicesAreSparse) && isReady
+    ? 'voice_recall'
+    : requestedMode
 
   if (!patient) return <div className="game1-loading">Loading...</div>
 
@@ -180,9 +239,9 @@ export default function Game1FamilyRecognition({ onBack, onComfortReady }) {
             <button
               key={opt.id}
               className="game1-option-btn"
-              onClick={() => handleAnswer(opt.tags[0], currentPhoto.tags[0])}
+              onClick={() => handleAnswer(photoName(opt), photoName(currentPhoto))}
             >
-              {opt.tags[0]}
+              {photoName(opt)}
             </button>
           ))}
         </div>
