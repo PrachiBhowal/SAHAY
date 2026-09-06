@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { saveSession, getPatientData, getMemoryAssets } from '../lib/localStorage'
 import { getAuthToken } from '../lib/api'
-import { useASR } from '../hooks/useASR'
+import useASR from '../hooks/useASR'
 import { hydrate, getCurrentTier, updateTierAfterSession } from '../lib/difficultyEngine.js'
 import { getRecentRoundsAcrossGames } from '../lib/performanceTracker.js'
 import { evaluateSessionsForComfortTrigger } from '../shared/comfortEngine.js'

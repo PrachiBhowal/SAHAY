@@ -5,6 +5,16 @@ export function getAuthToken() {
   return window.localStorage.getItem(TOKEN_KEY)
 }
 
+export function getTokenPatientId() {
+  const token = getAuthToken()
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')))
+    return payload.patient_id || (payload.role === 'patient' ? payload.id : null)
+  } catch {
+    return null
+  }
+}
+
 export function clearAuthToken() {
   window.localStorage.removeItem(TOKEN_KEY)
 }

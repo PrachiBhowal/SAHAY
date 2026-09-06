@@ -48,9 +48,11 @@ function formatDate(isoString) {
 }
 
 export default function MemoryShelf({ patientId = "p1", patientName = "Rina Devi" }) {
-  const [assets, setAssets] = useState(dummyAssets);
-  const [usingDummy, setUsingDummy] = useState(true);
+  const [assets, setAssets] = useState([]);
+  const [usingDummy, setUsingDummy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [familyMemberName, setFamilyMemberName] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -58,11 +60,7 @@ export default function MemoryShelf({ patientId = "p1", patientName = "Rina Devi
     async function fetchAssets() {
       try {
         const data = await api.getMemoryAssets(patientId);
-        if (!cancelled && Array.isArray(data) && data.length > 0) {
-          setAssets(data);
-          setUsingDummy(false);
-        }
-        // If API returns empty array or unexpected shape, silently keep dummy data
+        if (!cancelled) setAssets(Array.isArray(data) ? data : []);
       } catch (err) {
         // API not ready / errored — keep dummy data, no visible crash
         console.warn("Falling back to dummy memory assets:", err.message);
@@ -74,6 +72,49 @@ export default function MemoryShelf({ patientId = "p1", patientName = "Rina Devi
     fetchAssets();
     return () => { cancelled = true; };
   }, [patientId]);
+
+  async function handlePhotoUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const name = familyMemberName.trim();
+    if (!name) {
+      window.alert("Enter the family member's name before choosing a photo.");
+      event.target.value = "";
+      return;
+    }
+    setUploading(true);
+    try {
+      const url = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const asset = await api.createMemoryAsset(patientId, {
+        type: "photo",
+        url,
+        tags: [name],
+        uploaded_by: "caregiver",
+      });
+      setAssets((current) => [asset, ...current]);
+      setFamilyMemberName("");
+    } catch (err) {
+      window.alert(err.message || "Photo upload failed.");
+    } finally {
+      setUploading(false);
+      event.target.value = "";
+    }
+  }
+
+  async function handleDelete(assetId) {
+    if (!window.confirm("Remove this memory?")) return;
+    try {
+      await api.deleteMemoryAsset(patientId, assetId);
+      setAssets((current) => current.filter((asset) => asset.id !== assetId));
+    } catch (err) {
+      window.alert(err.message || "Memory could not be removed.");
+    }
+  }
 
   const stillUsefulCount = assets.filter((a) => a.tags?.includes("still-useful")).length;
 
@@ -87,6 +128,21 @@ export default function MemoryShelf({ patientId = "p1", patientName = "Rina Devi
           {stillUsefulCount} "Still Useful" recordings
         </span>
       </div>
+      <label style={styles.uploadButton}>
+        {uploading ? "Uploading..." : "Upload family photo"}
+        <input type="file" accept="image/*" onChange={handlePhotoUpload} disabled={uploading || !familyMemberName.trim()} hidden />
+      </label>
+      <label style={styles.nameField}>
+        <span>Family member name</span>
+        <input
+          type="text"
+          value={familyMemberName}
+          onChange={(event) => setFamilyMemberName(event.target.value)}
+          placeholder="e.g. Grandma Aita"
+          disabled={uploading}
+          style={styles.nameInput}
+        />
+      </label>
       <p style={{ color: "var(--color-sage)", fontSize: 14, marginTop: 0, marginBottom: 12 }}>
         Photos, voices, and songs that matter to {patientName} — recorded from her daily "Still Useful" moments and family uploads.
       </p>
@@ -100,7 +156,7 @@ export default function MemoryShelf({ patientId = "p1", patientName = "Rina Devi
       <div style={styles.grid}>
         {assets.map((asset) => (
           <div key={asset.id} style={styles.card}>
-            <div style={styles.iconCircle}>{typeIcon[asset.type] || "📄"}</div>
+            {asset.type === "photo" ? <img src={asset.url} alt="" style={styles.thumbnail} /> : <div style={styles.iconCircle}>{typeIcon[asset.type] || "📄"}</div>}
             <div style={styles.cardType}>{typeLabel[asset.type] || asset.type}</div>
             <div style={styles.cardDate}>{formatDate(asset.created_at)}</div>
             <div style={styles.tagRow}>
@@ -108,6 +164,7 @@ export default function MemoryShelf({ patientId = "p1", patientName = "Rina Devi
                 <span key={tag} style={styles.tagChip}>{tag.replace("-", " ")}</span>
               ))}
             </div>
+            <button type="button" onClick={() => handleDelete(asset.id)} style={styles.deleteButton}>Remove</button>
           </div>
         ))}
       </div>
@@ -116,6 +173,17 @@ export default function MemoryShelf({ patientId = "p1", patientName = "Rina Devi
 }
 
 const styles = {
+  uploadButton: {
+    display: "inline-block", background: "var(--color-terracotta)", color: "#fff", padding: "9px 14px",
+    borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 14, margin: "8px 0 16px",
+  },
+  nameField: {
+    display: "flex", flexDirection: "column", gap: 5, color: "var(--color-brown)",
+    fontSize: 13, fontWeight: 700, marginBottom: 12, maxWidth: 320,
+  },
+  nameInput: {
+    border: "1px solid var(--color-sage)", borderRadius: 6, padding: "8px 10px", fontSize: 14,
+  },
   devNotice: {
     background: "var(--color-background)",
     color: "var(--color-brown)",
@@ -149,6 +217,8 @@ const styles = {
     fontSize: 20,
     marginBottom: 4,
   },
+  thumbnail: { width: "100%", height: 110, objectFit: "cover", borderRadius: 8, background: "#fff" },
+  deleteButton: { border: "none", background: "transparent", color: "var(--color-terracotta)", cursor: "pointer", padding: 0, textAlign: "left" },
   cardType: { color: "var(--color-brown)", fontWeight: 700, fontSize: 15 },
   cardDate: { color: "var(--color-sage)", fontSize: 13 },
   tagRow: { display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 },

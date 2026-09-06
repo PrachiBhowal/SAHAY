@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { api, setToken } from "../api/client";
+import { api, setToken, setStoredUser } from "../api/client";
 import "./Login.css";
 
 const PATIENT_APP_URL = import.meta.env.VITE_PATIENT_APP_URL || "http://localhost:5173";
@@ -27,6 +27,7 @@ export default function Login({ onLogin }) {
         ? await api.signup(name, email, password, role)
         : await api.login(email, password, role);
       setToken(data.token);
+      setStoredUser(data.user);
       onLogin(data.user);
     } catch (err) {
       setError(err.message);

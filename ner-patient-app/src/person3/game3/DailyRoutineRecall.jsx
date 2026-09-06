@@ -18,8 +18,10 @@ import { useComfortTrigger } from "../../shared/ComfortTrigger.jsx";
 import "./DailyRoutineRecall.css";
 
 export default function DailyRoutineRecall({ patient, difficultyTier = 2, onTierChange, onComfortReady }) {
-  const languageCode = patient?.language_pref || "en";
+  const languageValue = patient?.language_pref || "en";
+  const languageCode = languageValue.toLowerCase().startsWith("assam") ? "as" : languageValue.toLowerCase().startsWith("hindi") ? "hi" : languageValue.toLowerCase().split("-")[0];
   const prompt = getDailyRecallPrompt(languageCode);
+  const isAssamese = languageCode === "as";
 
   const [submittedResponse, setSubmittedResponse] = useState(null);
   const [isFallbackPlaying, setIsFallbackPlaying] =
@@ -128,11 +130,10 @@ export default function DailyRoutineRecall({ patient, difficultyTier = 2, onTier
 
   return (
     <article className="game3-container">
-      <h1 className="game3-title screen-title">Daily Routine Recall</h1>
+      <h1 className="game3-title screen-title">{isAssamese ? "দৈনন্দিন কামৰ স্মৃতি" : "Daily Routine Recall"}</h1>
 
       <p className="game3-introduction">
-        Hello {patient?.name || "there"}. Take your time and tell us
-        about your day.
+        {isAssamese ? `${patient?.name || ""}, আপোনাৰ দিনটোৰ কথা কওক।` : `Hello ${patient?.name || "there"}. Take your time and tell us about your day.`}
       </p>
 
       <VoiceSupportNotice
@@ -151,27 +152,25 @@ export default function DailyRoutineRecall({ patient, difficultyTier = 2, onTier
             onClick={handlePlayPrompt}
             disabled={isSpeaking || isFallbackPlaying}
           >
-            {isSpeaking || isFallbackPlaying
-              ? "Playing prompt..."
-              : "Listen to prompt"}
+              {isSpeaking || isFallbackPlaying ? (isAssamese ? "শুনাই আছে..." : "Playing prompt...") : (isAssamese ? "প্ৰশ্নটো শুনক" : "Listen to prompt")}
           </button>
         </div>
       </section>
 
       {submittedResponse === null ? (
         <form className="game3-form" onSubmit={handleSubmit}>
-          <p>You can speak or type your response.</p>
+          <p>{isAssamese ? "আপুনি ক'ব বা লিখিব পাৰে।" : "You can speak or type your response."}</p>
 
           <div className="game3-actions">
             <button
               className="game3-button game3-button-secondary"
               type="button"
-              onClick={startListening}
+              onClick={() => startListening(languageCode)}
               disabled={isListening || !asrSupported}
             >
               {isListening
                 ? "Listening..."
-                : "Speak your answer"}
+                : (isAssamese ? "উত্তৰটো কওক" : "Speak your answer")}
             </button>
           </div>
 

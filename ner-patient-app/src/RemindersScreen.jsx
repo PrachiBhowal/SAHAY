@@ -8,6 +8,7 @@ export default function RemindersScreen({ onBack, patient: propPatient }) {
   const [patient, setPatient] = useState(propPatient || null)
   const [reminders, setReminders] = useState([])
   const [selectedReminder, setSelectedReminder] = useState(null)
+  const isAssamese = patient?.language_pref === 'as'
 
   useEffect(() => {
     let cancelled = false
@@ -42,11 +43,11 @@ export default function RemindersScreen({ onBack, patient: propPatient }) {
 
   return (
     <div className="reminders-shell">
-      <button className="reminders-back" onClick={onBack}>&#8592; Back</button>
+      <button className="reminders-back" onClick={onBack}>&#8592; {isAssamese ? 'ঘূৰি যাওক' : 'Back'}</button>
       <main className="reminders-content">
-        <p className="reminders-kicker">Today</p>
-        <h1 className="screen-title">Your reminders</h1>
-        <p className="reminders-intro">A gentle list of things to help your day go well.</p>
+        <p className="reminders-kicker">{isAssamese ? 'আজি' : 'Today'}</p>
+        <h1 className="screen-title">{isAssamese ? 'আপোনাৰ সোঁৱৰণী' : 'Your reminders'}</h1>
+        <p className="reminders-intro">{isAssamese ? 'আপোনাৰ দিনটো সহজ কৰিবলৈ কোমল সোঁৱৰণী।' : 'A gentle list of things to help your day go well.'}</p>
         <div className="reminders-list">
           {reminders.map(reminder => (
             <button key={reminder.id} className="reminder-card" onClick={() => setSelectedReminder(reminder)}>
@@ -57,7 +58,7 @@ export default function RemindersScreen({ onBack, patient: propPatient }) {
               </span>
             </button>
           ))}
-          {reminders.length === 0 && <p className="reminders-empty">There are no reminders yet.</p>}
+          {reminders.length === 0 && <p className="reminders-empty">{isAssamese ? 'এতিয়াও কোনো সোঁৱৰণী নাই।' : 'There are no reminders yet.'}</p>}
         </div>
         {selectedReminder && (
           <div className="reminder-detail">
@@ -65,7 +66,7 @@ export default function RemindersScreen({ onBack, patient: propPatient }) {
               reminder={selectedReminder}
               languageCode={patient?.language_pref || 'as'}
             />
-            <button className="reminder-close" onClick={() => setSelectedReminder(null)}>Done</button>
+            <button className="reminder-close" onClick={() => setSelectedReminder(null)}>{isAssamese ? 'সমাপ্ত' : 'Done'}</button>
           </div>
         )}
 

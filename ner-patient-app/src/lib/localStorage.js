@@ -123,8 +123,7 @@ export async function getPatientData(patientId) {
     const patient = await db.get(STORES.PATIENT, activeId)
     if (patient) return patient
   }
-  const all = await db.getAll(STORES.PATIENT)
-  return all[0] || null
+  return null
 }
 
 export async function savePatientData(patient) {

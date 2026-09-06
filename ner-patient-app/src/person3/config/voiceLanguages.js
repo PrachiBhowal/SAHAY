@@ -47,11 +47,17 @@ export const voiceLanguages = [
 ];
 
 export function resolveSpeechLanguage(patientLanguageCode) {
-  const normalizedCode = patientLanguageCode?.toLowerCase();
+  const aliases = {
+    assamese: "as",
+    hindi: "hi",
+    english: "en",
+    bengali: "bn",
+  };
+  const normalizedCode = aliases[patientLanguageCode?.toLowerCase()] || patientLanguageCode?.toLowerCase();
 
   const selectedLanguage = voiceLanguages.find(
     ({ patientCode, speechCode }) =>
-      patientCode.toLowerCase() === normalizedCode ||
+      patientCode.toLowerCase() === normalizedCode?.split("-")[0] ||
       speechCode.toLowerCase() === normalizedCode,
   );
 

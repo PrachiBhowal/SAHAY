@@ -1,12 +1,13 @@
 import { lazy, Suspense, useState, useEffect } from "react";
 import "./styles/tokens.css";
 import Login from "./pages/Login";
-import { api, clearToken } from "./api/client";
 import PatientOverview from "./components/PatientOverview";
 import RemindersPanel from "./components/RemindersPanel";
 import PatientsList from "./components/PatientsList";
 import AlertsPanel from "./components/AlertsPanel";
 import PatientStories from "./components/PatientStories";
+import MemorySelf from "./components/MemorySelf";
+import { api, clearToken, getStoredUser } from "./api/client";
 import "./styles/dashboard.css";
 
 const WeeklyGameTypeChart = lazy(() => import("./components/WeeklyGameTypeChart"));
@@ -92,7 +93,7 @@ function LinkPatientCard({ user, onLinked, onLogout }) {
 }
 
 export default function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => getStoredUser());
   const [activeTab, setActiveTab] = useState("overview");
   const [patients, setPatients] = useState([]);
   const [activePatient, setActivePatient] = useState(null);
@@ -199,6 +200,7 @@ export default function App() {
 
   function handleLogout() {
     clearToken();
+    window.localStorage.removeItem("sahay_caregiver_user");
     setUser(null);
     setActiveTab("overview");
     setActivePatient(null); // was: defaultPatient — that stub blocked re-fetch on next login
@@ -287,6 +289,7 @@ export default function App() {
         {activeTab === "overview" && (
           <div className="dashboard-content-stack">
             <PatientOverview patient={activePatient} lastActive={lastActive} />
+            <MemorySelf patientId={activePatient.id} patientName={activePatient.name} />
             <PatientStories patientId={activePatient.id} />
             {sessionsLoading ? (
               <p className="dashboard-status">Loading charts...</p>

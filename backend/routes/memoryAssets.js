@@ -43,3 +43,12 @@ memoryAssetsRouter.post("/:id/memory-assets", async (req, res) => {
 
   res.status(201).json(memoryAssetRowToContract(asset));
 });
+
+memoryAssetsRouter.delete("/:id/memory-assets/:assetId", async (req, res) => {
+  const result = await pool.query(
+    "DELETE FROM memory_assets WHERE id = $1 AND patient_id = $2",
+    [req.params.assetId, req.params.id]
+  );
+  if (result.rowCount === 0) return res.status(404).json(errorBody("Memory asset not found", "NOT_FOUND"));
+  res.status(204).end();
+});

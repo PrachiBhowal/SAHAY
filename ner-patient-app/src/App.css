@@ -52,3 +52,28 @@
   cursor: pointer;
   padding: 4px 14px;
 }
+
+.patient-reminder-alert {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #fff1c7;
+  color: #4a3226;
+  border-bottom: 2px solid var(--color-ochre, #c78932);
+}
+
+.patient-reminder-alert span { flex: 1; }
+
+.patient-reminder-alert button {
+  border: 0;
+  border-radius: 6px;
+  padding: 8px 12px;
+  background: var(--color-ochre, #c78932);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}

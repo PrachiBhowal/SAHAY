@@ -1,13 +1,23 @@
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
-let authToken = null;
+let authToken = window.localStorage.getItem("sahay_caregiver_auth_token");
 
 export function setToken(token) {
   authToken = token;
+  window.localStorage.setItem("sahay_caregiver_auth_token", token);
 }
 
 export function clearToken() {
   authToken = null;
+  window.localStorage.removeItem("sahay_caregiver_auth_token");
+}
+
+export function getStoredUser() {
+  try { return JSON.parse(window.localStorage.getItem("sahay_caregiver_user") || "null"); } catch { return null; }
+}
+
+export function setStoredUser(user) {
+  window.localStorage.setItem("sahay_caregiver_user", JSON.stringify(user));
 }
 
 async function request(path, options = {}) {
@@ -75,4 +85,6 @@ export const api = {
   deleteReminder: (patientId, reminderId) =>
     request(`/patients/${patientId}/reminders/${reminderId}`, { method: "DELETE" }),
   getMemoryAssets: (patientId) => request(`/patients/${patientId}/memory-assets`),
+  createMemoryAsset: (patientId, body) => request(`/patients/${patientId}/memory-assets`, { method: "POST", body: JSON.stringify(body) }),
+  deleteMemoryAsset: (patientId, assetId) => request(`/patients/${patientId}/memory-assets/${assetId}`, { method: "DELETE" }),
 };

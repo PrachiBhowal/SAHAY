@@ -12,7 +12,7 @@ import AndroidAppBar from './components/AndroidAppBar'
 import AndroidBottomNav from './components/AndroidBottomNav'
 import CaregiverPortalModal from './components/CaregiverPortalModal'
 import { getPatientData, clearActivePatient, setActivePatientId, getPendingSyncItems, clearSyncQueueItem } from './lib/localStorage'
-import { getAuthToken, clearAuthToken, api } from './lib/api'
+import { getAuthToken, getTokenPatientId, clearAuthToken, api } from './lib/api'
 import { ComfortTriggerContainer } from './shared/ComfortTrigger.jsx'
 import './tokens.css'
 import './App.css'
@@ -25,6 +25,7 @@ function App() {
   const [portalOpen, setPortalOpen] = useState(false)
   const [syncStatus, setSyncStatus] = useState(() => window.localStorage.getItem('sahay_sync_status') || 'online')
   const [bootstrapping, setBootstrapping] = useState(true)
+  const [dueReminder, setDueReminder] = useState(null)
 
   const activityHelp = {
     home: 'Choose any activity that looks welcoming. Take your time.',
@@ -38,9 +39,15 @@ function App() {
 
   // Check URL param or local active patient on load
   useEffect(() => {
+    const handleReminderDue = event => setDueReminder(event.detail)
+    window.addEventListener('sahay-reminder-due', handleReminderDue)
+    return () => window.removeEventListener('sahay-reminder-due', handleReminderDue)
+  }, [])
+
+  useEffect(() => {
     async function loadActivePatient() {
       const urlParams = new URLSearchParams(window.location.search)
-      const paramPatientId = urlParams.get('patientId')
+      const paramPatientId = urlParams.get('patientId') || getTokenPatientId()
 
       if (!getAuthToken()) {
         setBootstrapping(false)
@@ -64,6 +71,41 @@ function App() {
     window.addEventListener('sahay-sync-status', handleSyncStatus)
     return () => window.removeEventListener('sahay-sync-status', handleSyncStatus)
   }, [])
+
+  useEffect(() => {
+    if (!patientId) return undefined
+    let cancelled = false
+    const alertedKey = `sahay_alerted_reminders_${patientId}`
+    const checkReminders = async () => {
+      try {
+        const reminders = await api.getReminders(patientId)
+        const now = new Date()
+        const today = [now.getFullYear(), now.getMonth() + 1, now.getDate()].join('-')
+        const alerted = JSON.parse(window.localStorage.getItem(alertedKey) || '{}')
+        for (const reminder of reminders) {
+          const [hours, minutes] = String(reminder.time).split(':').map(Number)
+          const due = new Date(now)
+          due.setHours(hours, minutes, 0, 0)
+          const alertId = `${today}:${reminder.id}`
+          if (!cancelled && due <= now && due >= new Date(now.getTime() - 60 * 60 * 1000) && !alerted[alertId]) {
+            alerted[alertId] = true
+            setDueReminder(reminder)
+            if ('Notification' in window && Notification.permission === 'granted') {
+              new Notification('SAHAY reminder', { body: reminder.message })
+            }
+            window.dispatchEvent(new CustomEvent('sahay-reminder-due', { detail: reminder }))
+          }
+        }
+        window.localStorage.setItem(alertedKey, JSON.stringify(alerted))
+      } catch (error) {
+        console.warn('[patient-app] reminder check unavailable:', error)
+      }
+    }
+    if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission()
+    checkReminders()
+    const interval = window.setInterval(checkReminders, 30000)
+    return () => { cancelled = true; window.clearInterval(interval) }
+  }, [patientId])
 
   // BUG FIX: document.documentElement.lang was previously only ever set
   // inside Game 3 (DailyRoutineRecall.jsx), so ASR in every other screen
@@ -156,6 +198,14 @@ function App() {
       {syncStatus === 'offline' && (
         <div className="sync-status-banner" role="status" aria-live="polite">
           Offline mode: your activities are saved on this device and will sync when connected.
+        </div>
+      )}
+
+      {dueReminder && (
+        <div className="patient-reminder-alert" role="alert">
+          <strong>Reminder</strong>
+          <span>{dueReminder.message}</span>
+          <button type="button" onClick={() => setDueReminder(null)}>Dismiss</button>
         </div>
       )}
 
