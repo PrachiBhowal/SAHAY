@@ -1,0 +1,165 @@
+/* src/tokens.css */
+:root {
+  --color-terracotta: #C77B4F;
+  --color-sage: #8A9A7B;
+  --color-ochre: #D9A441;
+  --color-brown: #6B4F3B;
+  --color-background: #FAF6F0;
+  --color-text: #3A2E24;
+  --color-text-muted: #8A7A66;
+  --color-border: #E4DACD;
+  --color-border-strong: #D8CFC0;
+  --color-surface: #FFFFFF;
+
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Source Sans 3', sans-serif;
+
+  /* Canonical values per CONTRACTS.md Section 8 — do not drift from these locally */
+  --font-size-base: 20px;
+  --font-size-lg: 26px;
+  --font-size-xl: 32px;
+  --font-size-headline: 28px;
+
+  /* Driven by the Accessibility toggle. Default = 1 (Standard). */
+  --font-scale: 1;
+
+  --touch-target-min: 64px;
+  --spacing-unit: 8px;
+
+  /* Default (non-high-contrast) card background. Component CSS files
+     that previously hardcoded #fffaf2 / #fffdf9 directly now reference
+     this variable instead, so high-contrast mode (which overrides it
+     above) actually reaches them. */
+  --card-bg-fallback: #FFFAF2;
+}
+
+/* ============================================================
+   HIGH-CONTRAST MODE — set by AccessibilityContext via
+   data-high-contrast="true" on <html>. Don't set manually.
+   ============================================================ */
+[data-high-contrast="true"] {
+  --color-background: #FFFFFF;
+  --color-text: #000000;
+  --color-surface: #FFFFFF;
+  --color-terracotta: #8A4423;
+  --color-sage: #4A5A3A;
+  --color-ochre: #8A5F12;
+  /* BUG FIX: these three were never overridden before, so secondary
+     text (subtitles, timers, help copy) and every card/button outline
+     stayed at their low-contrast default values even with the toggle
+     on — the toggle looked like it barely did anything because most of
+     what a patient actually reads (not headline text) never changed. */
+  --color-text-muted: #3A3A3A;
+  --color-border: #000000;
+  --color-border-strong: #000000;
+  /* Fallback values used by component CSS files that hardcode a near-
+     white card background (e.g. #fffaf2) instead of a variable — see
+     --card-bg-fallback usage below. In high contrast this collapses
+     those cards to pure white so text drawn in --color-text (black)
+     stays legible against them. */
+  --card-bg-fallback: #FFFFFF;
+}
+
+/* ============================================================
+   SUNDOWN MODE — set by SundownContext via data-sundown="true"
+   on <html>, evenings 5-8pm by default.
+   ============================================================ */
+[data-sundown="true"] {
+  --color-background: #EFE6D8;
+  --color-ochre: #C79236;
+  --color-terracotta: #B06B41;
+}
+
+[data-high-contrast="true"][data-sundown="true"] {
+  --color-background: #FFFFFF;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: calc(var(--font-size-base) * var(--font-scale));
+  transition: background-color 300ms ease, color 300ms ease;
+}
+
+button,
+select,
+input,
+textarea {
+  min-height: var(--touch-target-min);
+}
+
+.screen-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: calc(var(--font-size-headline) * var(--font-scale));
+  line-height: 1.2;
+  margin: 0 0 16px;
+}
+
+.comfort-trigger {
+  position: fixed;
+  right: 16px;
+  bottom: calc(76px + env(safe-area-inset-bottom, 8px));
+  z-index: 40;
+}
+
+.sync-status-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  padding: 8px 16px;
+  background: var(--color-ochre);
+  color: var(--color-text);
+  font-size: calc(14px * var(--font-scale));
+  text-align: center;
+  font-weight: 600;
+}
+
+.global-help-button {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 55;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-brown);
+  font-family: Georgia, serif;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.global-help-panel {
+  position: fixed;
+  top: 72px;
+  right: 16px;
+  left: 16px;
+  max-width: 440px;
+  margin: 0 auto;
+  z-index: 120;
+  display: grid;
+  gap: 8px;
+  padding: 18px 20px;
+  border-left: 5px solid var(--color-ochre);
+  background: #fffaf2;
+  color: var(--color-brown);
+  box-shadow: 0 12px 32px rgba(74, 50, 38, 0.22);
+  border-radius: 14px;
+  font-size: calc(16px * var(--font-scale));
+}
+
+.global-help-panel span {
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}

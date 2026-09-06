@@ -1,0 +1,270 @@
+import { openDB } from 'idb'
+
+const DB_NAME = 'ner_care_app'
+const DB_VERSION = 1
+
+export const STORES = {
+  PATIENT: 'patient',
+  GAME_SESSIONS: 'game_sessions',
+  REMINDERS: 'reminders',
+  MEMORY_ASSETS: 'memory_assets',
+  SYNC_QUEUE: 'sync_queue'
+}
+
+let dbPromise = null
+
+export function getDB() {
+  if (!dbPromise) {
+    dbPromise = openDB(DB_NAME, DB_VERSION, {
+      upgrade(db) {
+        if (!db.objectStoreNames.contains(STORES.PATIENT)) {
+          db.createObjectStore(STORES.PATIENT, { keyPath: 'id' })
+        }
+        if (!db.objectStoreNames.contains(STORES.GAME_SESSIONS)) {
+          const store = db.createObjectStore(STORES.GAME_SESSIONS, { keyPath: 'id' })
+          store.createIndex('synced', 'synced')
+          store.createIndex('patient_id', 'patient_id')
+        }
+        if (!db.objectStoreNames.contains(STORES.REMINDERS)) {
+          db.createObjectStore(STORES.REMINDERS, { keyPath: 'id' })
+        }
+        if (!db.objectStoreNames.contains(STORES.MEMORY_ASSETS)) {
+          db.createObjectStore(STORES.MEMORY_ASSETS, { keyPath: 'id' })
+        }
+        if (!db.objectStoreNames.contains(STORES.SYNC_QUEUE)) {
+          db.createObjectStore(STORES.SYNC_QUEUE, { keyPath: 'id', autoIncrement: true })
+        }
+      }
+    })
+  }
+  return dbPromise
+}
+
+/**
+ * Returns all locally stored GameSessions for a patient, most recent
+ * first. Used to hydrate Person 4's performanceTracker on app start so
+ * the rolling window isn't empty after every reload.
+ */
+export async function getSessionsForPatient(patientId) {
+  const db = await getDB()
+  const all = await db.getAllFromIndex(STORES.GAME_SESSIONS, 'patient_id', patientId)
+  return all.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+}
+
+/**
+ * Saves a GameSession locally. Field names match the CONTRACTS.md schema
+ * exactly (snake_case) so sync to backend is a straight push, no mapping.
+ * synced: false until /sync confirms it — per contract, never delete
+ * unsynced data.
+ */
+export async function saveSession(session) {
+  const db = await getDB()
+  const record = {
+    ...session,
+    synced: false
+  }
+  await db.put(STORES.GAME_SESSIONS, record)
+  await queueForSync(record)
+  return record
+}
+
+/**
+ * Marks a session as synced after backend confirms via /sync.
+ * Person 5's sync engine calls this — not deleting, just flipping the flag.
+ */
+export async function markSessionSynced(sessionId) {
+  const db = await getDB()
+  const session = await db.get(STORES.GAME_SESSIONS, sessionId)
+  if (session) {
+    session.synced = true
+    await db.put(STORES.GAME_SESSIONS, session)
+  }
+}
+
+const ACTIVE_PATIENT_KEY = 'sahay_active_patient_id'
+
+export function getActivePatientId() {
+  return window.localStorage.getItem(ACTIVE_PATIENT_KEY) || null
+}
+
+export function setActivePatientId(patientId) {
+  if (patientId) {
+    window.localStorage.setItem(ACTIVE_PATIENT_KEY, patientId)
+  } else {
+    window.localStorage.removeItem(ACTIVE_PATIENT_KEY)
+  }
+  window.dispatchEvent(new CustomEvent('sahay-active-patient-changed', { detail: patientId }))
+}
+
+export function clearActivePatient() {
+  window.localStorage.removeItem(ACTIVE_PATIENT_KEY)
+  window.dispatchEvent(new CustomEvent('sahay-active-patient-changed', { detail: null }))
+}
+
+/**
+ * Returns all patient records stored locally on this device.
+ */
+export async function getAllPatientsLocal() {
+  const db = await getDB()
+  return (await db.getAll(STORES.PATIENT)) || []
+}
+
+/**
+ * Returns the requested patient, or currently active patient, or fallback.
+ */
+export async function getPatientData(patientId) {
+  const db = await getDB()
+  if (patientId) {
+    const patient = await db.get(STORES.PATIENT, patientId)
+    if (patient) return patient
+  }
+  const activeId = getActivePatientId()
+  if (activeId) {
+    const patient = await db.get(STORES.PATIENT, activeId)
+    if (patient) return patient
+  }
+  const all = await db.getAll(STORES.PATIENT)
+  return all[0] || null
+}
+
+export async function savePatientData(patient) {
+  if (!patient || !patient.id) return
+  const db = await getDB()
+  await db.put(STORES.PATIENT, patient)
+}
+
+export async function updatePatientDifficultyTierLocal(patientId, gameType, newTier) {
+  const patient = await getPatientData(patientId)
+  if (!patient) return
+
+  await savePatientData({
+    ...patient,
+    difficulty_tiers: {
+      ...patient.difficulty_tiers,
+      [gameType]: newTier
+    }
+  })
+}
+
+/**
+ * Adds a GameSession or AlertLog to the pending sync queue.
+ * Person 5's background sync reads from here when connectivity returns.
+ */
+export async function queueForSync(item) {
+  const db = await getDB()
+  const type = item.game_type
+    ? 'session'
+    : item.trigger_type
+      ? 'alert'
+      : 'memory_asset'
+
+  await db.add(STORES.SYNC_QUEUE, {
+    type,
+    item,
+    queued_at: new Date().toISOString()
+  })
+}
+
+export async function getPendingSyncItems() {
+  const db = await getDB()
+  return db.getAll(STORES.SYNC_QUEUE)
+}
+
+export async function clearSyncQueueItem(queueId) {
+  const db = await getDB()
+  await db.delete(STORES.SYNC_QUEUE, queueId)
+}
+
+/**
+ * Pushes pending sessions and alerts through the contract's batch sync endpoint.
+ * Successful queue entries are acknowledged locally; failed entries remain queued.
+ */
+export async function syncPendingItems({ apiBaseUrl, authToken, patientId }) {
+  if (!apiBaseUrl || !authToken || !patientId) return { syncedCount: 0, skipped: true }
+
+  const pending = await getPendingSyncItems()
+  const queuedSessions = pending
+    .filter(item => item.type === 'session' || (!item.type && item.item && 'game_type' in item.item))
+    .map(item => item.item)
+  const queuedAlerts = pending
+    .filter(item => item.type === 'alert' || (!item.type && item.item && 'trigger_type' in item.item))
+    .map(item => item.item)
+
+  if (queuedSessions.length === 0 && queuedAlerts.length === 0) {
+    return { syncedCount: 0, skipped: false }
+  }
+
+  const response = await fetch(`${apiBaseUrl}/sync`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${authToken}`
+    },
+    body: JSON.stringify({
+      patient_id: patientId,
+      queued_sessions: queuedSessions,
+      queued_alerts: queuedAlerts
+    })
+  })
+
+  const result = await response.json()
+  if (!response.ok || result.error) {
+    throw new Error(result.message || 'Sync failed')
+  }
+
+  const failedIds = new Set((result.failed || []).map(failure => failure.id))
+  const db = await getDB()
+  const tx = db.transaction([STORES.SYNC_QUEUE, STORES.GAME_SESSIONS], 'readwrite')
+  for (const item of pending) {
+    if (item.item?.id && !failedIds.has(item.item.id)) {
+      await tx.objectStore(STORES.SYNC_QUEUE).delete(item.id)
+      if (item.type === 'session' || (!item.type && item.item.game_type)) {
+        const session = await tx.objectStore(STORES.GAME_SESSIONS).get(item.item.id)
+        if (session) {
+          session.synced = true
+          await tx.objectStore(STORES.GAME_SESSIONS).put(session)
+        }
+      }
+    }
+  }
+  await tx.done
+
+  return { syncedCount: result.synced_count || 0, skipped: false }
+}
+
+/**
+ * Reminders + memory assets are cached copies pulled from backend on sync,
+ * per contract Section 5.
+ */
+export async function cacheReminders(reminders) {
+  const db = await getDB()
+  const tx = db.transaction(STORES.REMINDERS, 'readwrite')
+  await Promise.all(reminders.map(r => tx.store.put(r)))
+  await tx.done
+}
+
+export async function getReminders(patientId) {
+  const db = await getDB()
+  const all = await db.getAll(STORES.REMINDERS)
+  return all.filter(r => r.patient_id === patientId)
+}
+
+export async function cacheMemoryAssets(assets) {
+  const db = await getDB()
+  const tx = db.transaction(STORES.MEMORY_ASSETS, 'readwrite')
+  await Promise.all(assets.map(a => tx.store.put(a)))
+  await tx.done
+}
+
+export async function getMemoryAssets(patientId) {
+  const db = await getDB()
+  const all = await db.getAll(STORES.MEMORY_ASSETS)
+  return all.filter(a => a.patient_id === patientId)
+}
+
+export async function saveMemoryAsset(asset) {
+  const db = await getDB()
+  await db.put(STORES.MEMORY_ASSETS, asset)
+  await queueForSync(asset)
+  return asset
+}

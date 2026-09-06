@@ -1,0 +1,156 @@
+.game3-screen {
+  min-height: 100vh;
+  padding: calc(var(--spacing-unit) * 3);
+  background: var(--color-background);
+}
+
+.game3-back-button {
+  min-height: var(--touch-target-min);
+  padding: var(--spacing-unit) calc(var(--spacing-unit) * 2);
+  border: 2px solid var(--color-border-strong);
+  border-radius: 16px;
+  background: var(--color-surface);
+  color: var(--color-brown);
+  font: inherit;
+  cursor: pointer;
+}
+
+.game3-container {
+  width: min(100%, 760px);
+  margin: calc(var(--spacing-unit) * 3) auto;
+  padding: calc(var(--spacing-unit) * 4);
+  border: 2px solid var(--color-border);
+  border-radius: 24px;
+  background: var(--color-surface);
+}
+
+/* headline sizing now comes from the shared .screen-title class in tokens.css */
+.game3-title {
+  margin-top: 0;
+  color: var(--color-brown);
+}
+
+.game3-introduction {
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.game3-prompt {
+  margin: calc(var(--spacing-unit) * 3) 0;
+  padding: calc(var(--spacing-unit) * 3);
+  border-left: 8px solid var(--color-ochre);
+  border-radius: 12px;
+  background: var(--color-background);
+  font-size: var(--font-size-lg);
+  line-height: 1.4;
+}
+
+.game3-timer {
+  margin: var(--spacing-unit) 0 0;
+  color: var(--color-text-muted);
+  font-size: 16px;
+}
+
+.game3-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--spacing-unit) * 2);
+  margin: calc(var(--spacing-unit) * 2) 0;
+}
+
+.game3-button {
+  min-height: var(--touch-target-min);
+  padding: var(--spacing-unit) calc(var(--spacing-unit) * 3);
+  border: 0;
+  border-radius: 16px;
+  background: var(--color-terracotta);
+  color: var(--color-surface);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.game3-button-secondary {
+  background: var(--color-sage);
+}
+
+.game3-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.game3-form {
+  margin-top: calc(var(--spacing-unit) * 4);
+}
+
+.game3-label {
+  display: block;
+  margin-bottom: var(--spacing-unit);
+  color: var(--color-brown);
+  font-weight: 700;
+}
+
+.game3-response {
+  width: 100%;
+  min-height: 180px;
+  padding: calc(var(--spacing-unit) * 2);
+  border: 2px solid var(--color-border-strong);
+  border-radius: 16px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  font: inherit;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.game3-response:focus {
+  outline: 4px solid color-mix(in srgb,
+      var(--color-ochre) 45%,
+      transparent);
+  border-color: var(--color-brown);
+}
+
+.game3-complete {
+  margin-top: calc(var(--spacing-unit) * 4);
+  padding: calc(var(--spacing-unit) * 3);
+  border-radius: 16px;
+  background: var(--color-background);
+}
+
+.game3-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-unit);
+  padding: 0;
+  list-style: none;
+}
+
+.game3-keyword {
+  padding: var(--spacing-unit) calc(var(--spacing-unit) * 2);
+  border-radius: 999px;
+  background: var(--color-ochre);
+  color: var(--color-text);
+}
+
+.game3-status {
+  width: min(100%, 760px);
+  margin: calc(var(--spacing-unit) * 5) auto;
+  padding: calc(var(--spacing-unit) * 3);
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+@media (max-width: 600px) {
+  .game3-screen {
+    padding: calc(var(--spacing-unit) * 2);
+  }
+
+  .game3-container {
+    padding: calc(var(--spacing-unit) * 2);
+  }
+
+  .game3-actions,
+  .game3-button {
+    width: 100%;
+  }
+}

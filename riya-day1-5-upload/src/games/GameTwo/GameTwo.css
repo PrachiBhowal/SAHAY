@@ -1,0 +1,99 @@
+.game2 {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: calc(var(--spacing-unit) * 3);
+  background: var(--color-surface);
+  border-radius: 20px;
+}
+
+.game2__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: calc(var(--spacing-unit) * 2);
+}
+
+.game2__eyebrow {
+  font-size: calc(var(--font-size-base) * var(--font-scale) * 0.75);
+  color: var(--color-brown);
+  opacity: 0.75;
+}
+
+.game2__tier-badge {
+  font-size: calc(var(--font-size-base) * var(--font-scale) * 0.7);
+  color: var(--color-brown);
+  background: var(--color-sage);
+  opacity: 0.7;
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+
+.game2__prompt {
+  font-size: calc(var(--font-size-lg) * var(--font-scale));
+  color: var(--color-body-text);
+  line-height: 1.5;
+  margin: 0 0 calc(var(--spacing-unit) * 3);
+}
+
+.game2__grid {
+  display: grid;
+  gap: calc(var(--spacing-unit) * 1.5);
+  margin-bottom: calc(var(--spacing-unit) * 3);
+}
+
+.game2__tile {
+  aspect-ratio: 1;
+  min-height: var(--touch-target-min);
+  background: var(--color-sage);
+  border: none;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--font-size-xl) * var(--font-scale));
+  cursor: pointer;
+  transition: transform var(--transition-base), outline-color var(--transition-base);
+}
+
+.game2__tile:active {
+  transform: scale(0.96);
+}
+
+.game2__tile:focus-visible {
+  outline: 3px solid var(--color-ochre);
+  outline-offset: 3px;
+}
+
+.game2__tile.is-found {
+  outline: 3px solid var(--color-brown);
+  outline-offset: 3px;
+}
+
+.game2__tile:disabled {
+  cursor: default;
+}
+
+.game2__feedback {
+  background: #FFFFFF;
+  border: 1px solid var(--color-brown);
+  border-radius: 14px;
+  padding: calc(var(--spacing-unit) * 1.75) calc(var(--spacing-unit) * 2);
+  font-size: calc(var(--font-size-base) * var(--font-scale));
+  color: var(--color-brown);
+  line-height: 1.5;
+}
+
+/* All feedback tones stay warm and non-punitive — no red/error styling
+   exists here on purpose. "redirect" (a miss) looks the same register
+   as "found", just different copy. */
+.game2__feedback--found {
+  border-color: var(--color-sage);
+}
+
+.game2__feedback--redirect {
+  border-color: var(--color-terracotta);
+}
+
+.game2__feedback--hint {
+  border-color: var(--color-ochre);
+}

@@ -1,0 +1,72 @@
+.still-useful-shell {
+  min-height: 100vh;
+  padding: calc(var(--spacing-unit) * 3);
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+.still-useful-back {
+  min-height: var(--touch-target-min);
+  padding: 0 calc(var(--spacing-unit) * 2);
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.still-useful-content {
+  width: min(100%, 680px);
+  margin: calc(var(--spacing-unit) * 8) auto;
+  padding: calc(var(--spacing-unit) * 5);
+  border: 2px solid var(--color-border);
+  border-radius: 24px;
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.still-useful-label {
+  color: var(--color-terracotta);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.still-useful-headline {
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: var(--font-size-xl);
+  line-height: 1.25;
+}
+
+.still-useful-subtext {
+  color: var(--color-text-muted);
+}
+
+.still-useful-record-btn {
+  min-height: var(--touch-target-min);
+  padding: 0 calc(var(--spacing-unit) * 3);
+  border: 0;
+  border-radius: 16px;
+  background: var(--color-terracotta);
+  color: var(--color-surface);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.still-useful-record-btn.recording {
+  background: var(--color-brown);
+}
+
+.still-useful-loading {
+  padding: 40vh calc(var(--spacing-unit) * 3);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.still-useful-error {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--color-terracotta);
+  margin-top: 20px;
+}

@@ -1,0 +1,91 @@
+.attention-shell {
+    min-height: 100vh;
+    padding: 24px 28px 64px;
+    color: var(--color-brown);
+    background: var(--color-background);
+}
+
+.attention-back {
+    min-height: var(--touch-target-min);
+    border: 0;
+    background: transparent;
+    color: var(--color-text-muted);
+    font: inherit;
+    cursor: pointer;
+}
+
+.attention-content {
+    max-width: 720px;
+    margin: 36px auto 0;
+    text-align: center;
+}
+
+.attention-kicker {
+    color: var(--color-terracotta);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+/* headline sizing now comes from the shared .screen-title class in tokens.css */
+.attention-message {
+    min-height: 32px;
+    font-size: 1.25rem;
+}
+
+.attention-countdown {
+    color: var(--color-terracotta);
+    font-weight: 700;
+}
+
+.attention-items {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    margin-top: 36px;
+}
+
+.attention-item {
+    min-height: 110px;
+    padding: 20px;
+    border: 2px solid var(--color-sage);
+    border-radius: 12px;
+    background: var(--card-bg-fallback, #fffaf2);
+    color: var(--color-brown);
+    font: inherit;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.attention-items-choose .attention-item {
+    opacity: .9;
+}
+
+.attention-choices {
+    margin-top: 30px;
+}
+
+.attention-choices p {
+    color: var(--color-text-muted);
+    margin-bottom: 12px;
+}
+
+.attention-choice {
+    min-height: 64px;
+    margin: 5px;
+    padding: 0 22px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 8px;
+    background: var(--color-surface);
+    color: var(--color-brown);
+    font: inherit;
+    cursor: pointer;
+}
+
+.attention-choice:hover,
+.attention-choice:focus-visible {
+    border-color: var(--color-terracotta);
+    outline: 3px solid rgba(190, 93, 65, .2);
+}

@@ -1,0 +1,23 @@
+.gamosa-border {
+  width: 100%;
+  height: 20px;
+  background-image: url('./gamosa-border.svg');
+  background-repeat: repeat-x;
+  background-size: 48px 20px;
+}
+
+/* Strip mode: full-strength, used as a horizontal band — login card
+   top/bottom border, dashboard sidebar strip near the logo. */
+.gamosa-border--strip {
+  opacity: 1;
+}
+
+/* Corner mode: quiet accent, per AI_HANDOFF §9 ("season, don't
+   dominate"). Meant to be positioned absolutely by the consumer
+   (e.g. Person 1's game screens) — this class only sets opacity/size,
+   layout is the caller's responsibility since it varies per screen. */
+.gamosa-border--corner {
+  opacity: 0.08;
+  height: 40px;
+  background-size: 96px 40px;
+}

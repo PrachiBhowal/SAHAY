@@ -1,0 +1,19 @@
+{
+  "name": "sahay",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "install:all": "npm install && npm install --prefix backend && npm install --prefix ner-patient-app && npm install --prefix ner-dementia-dashboard",
+    "dev": "concurrently -n API,PATIENT,DASHBOARD -c blue,green,yellow \"npm run dev:backend\" \"npm run dev:patient\" \"npm run dev:dashboard\"",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:patient": "npm --prefix ner-patient-app run dev -- --port 5173",
+    "dev:dashboard": "npm --prefix ner-dementia-dashboard run dev -- --port 5174",
+    "build": "npm run build:patient && npm run build:dashboard",
+    "build:patient": "npm --prefix ner-patient-app run build",
+    "build:dashboard": "npm --prefix ner-dementia-dashboard run build",
+    "seed": "npm --prefix backend run seed"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

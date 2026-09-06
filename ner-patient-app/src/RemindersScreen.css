@@ -1,0 +1,17 @@
+.reminders-shell { min-height: 100vh; padding: 24px; background: var(--color-cream, #f7f0e5); color: var(--color-brown); }
+.reminders-back { min-height: 64px; border: 0; background: transparent; color: var(--color-text-muted); font: inherit; cursor: pointer; }
+.reminders-content { max-width: 720px; margin: 42px auto; }
+.reminders-kicker { color: var(--color-terracotta); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+/* headline sizing now comes from the shared .screen-title class in tokens.css */
+.reminders-content h1 { margin: 0 0 10px; }
+.reminders-intro { font-size: 1.2rem; }
+.reminders-list { display: grid; gap: 14px; margin-top: 30px; }
+.reminder-card { display: flex; align-items: center; gap: 20px; min-height: 88px; padding: 18px; border: 2px solid var(--color-sage); border-radius: 12px; background: var(--card-bg-fallback, #fffaf2); color: var(--color-brown); text-align: left; font: inherit; cursor: pointer; }
+.reminder-card:hover, .reminder-card:focus-visible { border-color: var(--color-terracotta); outline: 3px solid rgba(190, 93, 65, .2); }
+.reminder-time { min-width: 72px; color: var(--color-terracotta); font-size: 1.3rem; font-weight: 700; }
+.reminder-card strong, .reminder-card small { display: block; }
+.reminder-card small { margin-top: 6px; color: var(--color-text-muted); text-transform: capitalize; }
+.reminders-empty { padding: 24px 0; color: var(--color-text-muted); }
+.reminder-detail { margin-top: 24px; padding: 24px; border-left: 5px solid var(--color-ochre); background: var(--card-bg-fallback, #fffaf2); }
+.reminder-detail h2 { text-transform: capitalize; }
+.reminder-close { min-height: 64px; padding: 0 28px; border: 0; border-radius: 8px; background: var(--color-terracotta); color: #fff; font: inherit; cursor: pointer; }

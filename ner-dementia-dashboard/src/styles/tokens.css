@@ -1,0 +1,48 @@
+/* BUG FIX: this file previously used its own invented variable names
+   (--color-charcoal) and its own slightly-off hex values (terracotta
+   was #C1652F here vs #C77B4F in the patient app) — two independently
+   maintained token sets for the same design system, which is exactly
+   why the dashboard and patient app never looked consistent. Values
+   below now match ner-patient-app/src/tokens.css exactly, per
+   CONTRACTS.md Section 8 (Person 2 owns source of truth). --color-text
+   is kept as the canonical name; --color-charcoal is aliased to it so
+   any existing dashboard component still referencing the old name
+   doesn't break silently. */
+:root {
+  --color-terracotta: #C77B4F;
+  --color-sage: #8A9A7B;
+  --color-ochre: #D9A441;
+  --color-brown: #6B4F3B;
+  --color-background: #FAF6F0;
+  --color-text: #3A2E24;
+  --color-text-muted: #8A7A66;
+  --color-border: #E4DACD;
+  --color-border-strong: #D8CFC0;
+  --color-surface: #FFFFFF;
+
+  /* Alias for any component still using the old dashboard-only name */
+  --color-charcoal: var(--color-text);
+
+  --font-size-base: 20px;
+  --font-size-lg: 26px;
+  --font-size-xl: 32px;
+  --font-size-headline: 28px;
+
+  --touch-target-min: 64px;
+  --spacing-unit: 8px;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+  font-family: system-ui, sans-serif;
+  margin: 0;
+}
+
+button,
+select,
+input,
+textarea {
+  min-height: var(--touch-target-min);
+}
