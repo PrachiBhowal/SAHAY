@@ -1,7 +1,8 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
-import { pool } from "../db/index.js";
+import { isUsingDevDatabase, pool } from "../db/index.js";
+import { saveDevCaregiver, saveDevLink, saveDevPatient } from "../db/devPersistence.js";
 import { signToken, errorBody, requireAuth } from "../middleware/auth.js";
 
 export const authRouter = Router();
@@ -56,6 +57,9 @@ authRouter.post("/signup", async (req, res) => {
     "INSERT INTO caregivers (id, name, email, caregiver_code, password_hash, role, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)",
     [id, name, email, caregiver_code, password_hash, role, created_at]
   );
+  if (isUsingDevDatabase) {
+    await saveDevCaregiver({ id, name, email, caregiver_code, password_hash, role, created_at });
+  }
 
   const user = { id, role, email, name, caregiver_code, linked_patient_ids: [] };
   const token = signToken(user);
@@ -86,6 +90,7 @@ authRouter.post("/login", async (req, res) => {
   if (!caregiver_code) {
     caregiver_code = makeCaregiverCode();
     await pool.query("UPDATE caregivers SET caregiver_code = $1 WHERE id = $2", [caregiver_code, caregiver.id]);
+    if (isUsingDevDatabase) await saveDevCaregiver({ ...caregiver, caregiver_code });
   }
   const linked_patient_ids = await getLinkedPatientIds(caregiver.id);
 
@@ -131,12 +136,23 @@ authRouter.post("/patient-signup", async (req, res) => {
      VALUES ($1, $2, $3, $4, $5, $6)`,
     [patientId, name.trim(), language_pref, region_village.trim(), accessCodeHash, createdAt]
   );
+  if (isUsingDevDatabase) {
+    await saveDevPatient({
+      id: patientId,
+      name: name.trim(),
+      language_pref,
+      region_village: region_village.trim(),
+      access_code_hash: accessCodeHash,
+      created_at: createdAt,
+    });
+  }
 
   if (caregiver) {
     await pool.query(
       "INSERT INTO caregiver_patients (caregiver_id, patient_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
       [caregiver.id, patientId]
     );
+    if (isUsingDevDatabase) await saveDevLink(caregiver.id, patientId);
   }
 
   const user = { id: patientId, role: "patient", patient_id: patientId, name: name.trim() };
@@ -163,6 +179,7 @@ authRouter.post("/link-patient", requireAuth, async (req, res) => {
     "INSERT INTO caregiver_patients (caregiver_id, patient_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
     [req.user.id, patientId]
   );
+  if (isUsingDevDatabase) await saveDevLink(req.user.id, patientId);
   res.json({ patient_id: patientId, linked: true });
 });
 
@@ -181,6 +198,7 @@ authRouter.post("/link-caregiver", requireAuth, async (req, res) => {
     "INSERT INTO caregiver_patients (caregiver_id, patient_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
     [caregiver.id, req.user.patient_id]
   );
+  if (isUsingDevDatabase) await saveDevLink(caregiver.id, req.user.patient_id);
   res.json({ caregiver_id: caregiver.id, caregiver_code: caregiverCode, linked: true });
 });
 

@@ -14,6 +14,15 @@ function todayKey() {
   return new Date().toISOString().slice(0, 10)
 }
 
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => resolve(reader.result)
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
+}
+
 export default function StillUseful({ onBack }) {
   const [patient, setPatient] = useState(null)
   const [alreadyRecordedToday, setAlreadyRecordedToday] = useState(false)
@@ -87,13 +96,7 @@ export default function StillUseful({ onBack }) {
     recorder.ondataavailable = (e) => chunksRef.current.push(e.data)
     recorder.onstop = async () => {
       const blob = new Blob(chunksRef.current, { type: mimeTypeRef.current })
-
-      // KNOWN GAP, not silently solved: this URL only survives the current
-      // browser session/device. Person 5 needs a real upload endpoint before
-      // this can sync across devices or survive a reload after clearing
-      // browser storage. Flag in CONTRACTS.md Section 4 before relying on
-      // this for the demo beyond a single device.
-      const url = URL.createObjectURL(blob)
+      const url = await blobToDataUrl(blob)
 
       await saveMemoryAsset({
         id: crypto.randomUUID(),
@@ -101,10 +104,6 @@ export default function StillUseful({ onBack }) {
         type: 'voice',
         url,
         tags: [todayKey()],
-        // KNOWN MISMATCH, not silently resolved: CONTRACTS.md types
-        // uploaded_by as Caregiver.id, but this is patient-recorded.
-        // Using patient.id here until the team confirms the intended
-        // field/type for patient-originated MemoryAssets.
         uploaded_by: patient.id,
         created_at: new Date().toISOString()
       })

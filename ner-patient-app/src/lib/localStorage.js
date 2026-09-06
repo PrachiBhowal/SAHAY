@@ -189,8 +189,11 @@ export async function syncPendingItems({ apiBaseUrl, authToken, patientId }) {
   const queuedAlerts = pending
     .filter(item => item.type === 'alert' || (!item.type && item.item && 'trigger_type' in item.item))
     .map(item => item.item)
+  const queuedMemoryAssets = pending
+    .filter(item => item.type === 'memory_asset')
+    .map(item => item.item)
 
-  if (queuedSessions.length === 0 && queuedAlerts.length === 0) {
+  if (queuedSessions.length === 0 && queuedAlerts.length === 0 && queuedMemoryAssets.length === 0) {
     return { syncedCount: 0, skipped: false }
   }
 
@@ -203,7 +206,8 @@ export async function syncPendingItems({ apiBaseUrl, authToken, patientId }) {
     body: JSON.stringify({
       patient_id: patientId,
       queued_sessions: queuedSessions,
-      queued_alerts: queuedAlerts
+      queued_alerts: queuedAlerts,
+      queued_memory_assets: queuedMemoryAssets
     })
   })
 

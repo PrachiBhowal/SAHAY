@@ -16,7 +16,9 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({ origin: process.env.FRONTEND_URL || "*" }));
-app.use(express.json());
+// Voice reminders are persisted as portable audio data URLs in local/dev mode.
+// Allow small recordings through the JSON API instead of Express's 100 KB default.
+app.use(express.json({ limit: "10mb" }));
 
 // Vercel handles TLS/HTTPS termination itself — every request already arrives
 // over HTTPS at the platform edge, so there's no manual redirect middleware

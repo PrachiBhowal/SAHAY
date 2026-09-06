@@ -6,7 +6,7 @@ export const syncRouter = Router();
 syncRouter.use(requireAuth);
 
 // POST /api/sync
-// body: { patient_id, queued_sessions: GameSession[], queued_alerts: AlertLog[] }
+// body: { patient_id, queued_sessions: GameSession[], queued_alerts: AlertLog[], queued_memory_assets: MemoryAsset[] }
 // returns: { synced_count, failed: [] }
 //
 // Conflict resolution: LAST-WRITE-WINS, keyed on the client-generated `id`.
@@ -15,7 +15,7 @@ syncRouter.use(requireAuth);
 // arrives last for a given id wins. Deliberately simple per AI_HANDOFF ยง9
 // (explainable > clever for a demo).
 syncRouter.post("/", async (req, res) => {
-  const { patient_id, queued_sessions = [], queued_alerts = [] } = req.body || {};
+  const { patient_id, queued_sessions = [], queued_alerts = [], queued_memory_assets = [] } = req.body || {};
   if (!patient_id) {
     return res.status(400).json(errorBody("patient_id is required", "VALIDATION_ERROR"));
   }
@@ -85,6 +85,26 @@ syncRouter.post("/", async (req, res) => {
         synced_count++;
       } catch (err) {
         failed.push({ type: "alert", id: alert.id, reason: err.message });
+      }
+    }
+
+    for (const asset of queued_memory_assets) {
+      try {
+        if (asset.type !== "voice" || !asset.id || !asset.url || !Array.isArray(asset.tags)) {
+          throw new Error("memory asset is invalid");
+        }
+        await client.query(
+          `INSERT INTO memory_assets (id, patient_id, type, url, tags, uploaded_by, created_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)
+           ON CONFLICT (id) DO UPDATE SET
+             url = EXCLUDED.url,
+             tags = EXCLUDED.tags,
+             created_at = EXCLUDED.created_at`,
+          [asset.id, patient_id, asset.type, asset.url, JSON.stringify(asset.tags), asset.uploaded_by || patient_id, asset.created_at || new Date().toISOString()]
+        );
+        synced_count++;
+      } catch (err) {
+        failed.push({ type: "memory_asset", id: asset.id, reason: err.message });
       }
     }
 

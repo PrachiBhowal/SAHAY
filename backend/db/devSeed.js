@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import { pool } from "./index.js";
+import { hydrateDevData } from "./devPersistence.js";
 
 const patients = [
     { id: "p1", name: "Rina Devi", language_pref: "as", region_village: "Nagaon, Assam", access_code: "2468" },
@@ -40,6 +41,8 @@ export async function seedDevelopmentData() {
             ["asha-1", patient.id]
         );
     }
+
+    await hydrateDevData(pool);
 }
 
 export function createDevelopmentPatientId() {

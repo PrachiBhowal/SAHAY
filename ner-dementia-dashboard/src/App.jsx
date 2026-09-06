@@ -6,6 +6,7 @@ import PatientOverview from "./components/PatientOverview";
 import RemindersPanel from "./components/RemindersPanel";
 import PatientsList from "./components/PatientsList";
 import AlertsPanel from "./components/AlertsPanel";
+import PatientStories from "./components/PatientStories";
 import "./styles/dashboard.css";
 
 const WeeklyGameTypeChart = lazy(() => import("./components/WeeklyGameTypeChart"));
@@ -251,7 +252,19 @@ export default function App() {
           </div>
           <div className="dashboard-header-actions">
             <div className="dashboard-account-code"><span>Caregiver code</span><strong>{user.caregiver_code}</strong></div>
-            <div className="dashboard-patient-badge"><span>Viewing</span>{activePatient.name}</div>
+            {patients.length > 1 ? (
+              <label className="dashboard-patient-picker">
+                <span>Viewing</span>
+                <select value={activePatient.id} onChange={(event) => {
+                  const selected = patients.find((patient) => patient.id === event.target.value)
+                  if (selected) handleSelectPatient(selected)
+                }}>
+                  {patients.map((patient) => <option key={patient.id} value={patient.id}>{patient.name}</option>)}
+                </select>
+              </label>
+            ) : (
+              <div className="dashboard-patient-badge"><span>Viewing</span>{activePatient.name}</div>
+            )}
             <a
               href={`${PATIENT_APP_URL}/?patientId=${activePatient.id}`}
               target="_blank"
@@ -274,6 +287,7 @@ export default function App() {
         {activeTab === "overview" && (
           <div className="dashboard-content-stack">
             <PatientOverview patient={activePatient} lastActive={lastActive} />
+            <PatientStories patientId={activePatient.id} />
             {sessionsLoading ? (
               <p className="dashboard-status">Loading charts...</p>
             ) : (

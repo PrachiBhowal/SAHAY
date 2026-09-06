@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { getPatientData, getReminders } from './lib/localStorage'
+import { getPatientData, getReminders, cacheReminders } from './lib/localStorage'
+import { api } from './lib/api'
 import FamilyVoiceReminder from './person3/familyVoice/FamilyVoiceReminder'
 import './RemindersScreen.css'
 
@@ -9,14 +10,34 @@ export default function RemindersScreen({ onBack, patient: propPatient }) {
   const [selectedReminder, setSelectedReminder] = useState(null)
 
   useEffect(() => {
+    let cancelled = false
+
     async function load() {
       const p = propPatient || await getPatientData()
       if (p) {
         setPatient(p)
         setReminders(await getReminders(p.id))
+        try {
+          const remoteReminders = await api.getReminders(p.id)
+          if (!cancelled) {
+            setReminders(remoteReminders)
+            await cacheReminders(remoteReminders)
+          }
+        } catch (error) {
+          console.warn('[patient-app] reminder refresh unavailable:', error)
+        }
       }
     }
     load()
+
+    const refreshOnReturn = () => load()
+    window.addEventListener('focus', refreshOnReturn)
+    const interval = window.setInterval(load, 30000)
+    return () => {
+      cancelled = true
+      window.removeEventListener('focus', refreshOnReturn)
+      window.clearInterval(interval)
+    }
   }, [propPatient])
 
   return (

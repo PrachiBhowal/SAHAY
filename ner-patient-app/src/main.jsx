@@ -32,14 +32,17 @@ async function flushSyncQueue() {
     const queuedAlerts = pending
         .filter(p => p.type === 'alert' || (!p.type && p.item && 'trigger_type' in p.item))
         .map(p => p.item)
+    const queuedMemoryAssets = pending
+        .filter(p => p.type === 'memory_asset')
+        .map(p => p.item)
 
-    if (queuedSessions.length === 0 && queuedAlerts.length === 0) return { syncedCount: 0 }
+    if (queuedSessions.length === 0 && queuedAlerts.length === 0 && queuedMemoryAssets.length === 0) return { syncedCount: 0 }
 
-    const result = await api.sync(patient.id, queuedSessions, queuedAlerts)
+    const result = await api.sync(patient.id, queuedSessions, queuedAlerts, queuedMemoryAssets)
     const failedIds = new Set(result.failed.map(item => item.id))
     await Promise.all(
         pending
-            .filter(item => item.type === 'session' || item.type === 'alert')
+            .filter(item => item.type === 'session' || item.type === 'alert' || item.type === 'memory_asset')
             .filter(item => !failedIds.has(item.item.id))
             .map(item => clearSyncQueueItem(item.id))
     )
@@ -49,7 +52,6 @@ async function flushSyncQueue() {
 export async function syncPatient(patientId) {
     if (!patientId) return null
     try {
-        await api.loginPatient(patientId)
         const [remotePatient, reminders, memoryAssets] = await Promise.all([
             api.getPatient(patientId),
             api.getReminders(patientId),

@@ -67,6 +67,7 @@ export default function PatientsList({ patients = [], activePatientId, onSelect 
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ fontWeight: 700, fontSize: 17 }}>{p.name}</span>
+                  <span style={styles.patientId}>ID: {p.id}</span>
                   {openAlerts > 0 && (
                     <span
                       style={{
@@ -127,6 +128,12 @@ const styles = {
     padding: "14px 16px",
     borderRadius: 10,
     cursor: "pointer",
+  },
+  patientId: {
+    color: "var(--color-text-muted)",
+    fontSize: 12,
+    fontWeight: 600,
+    overflowWrap: "anywhere",
   },
   alertBadge: { fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 10 },
 };

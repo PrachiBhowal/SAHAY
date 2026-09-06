@@ -57,9 +57,9 @@ export const api = {
   getPatient: (patientId) => request(`/patients/${patientId}`),
   getReminders: (patientId) => request(`/patients/${patientId}/reminders`),
   getMemoryAssets: (patientId) => request(`/patients/${patientId}/memory-assets`),
-  sync: (patientId, queuedSessions, queuedAlerts) => request('/sync', {
+  sync: (patientId, queuedSessions, queuedAlerts, queuedMemoryAssets = []) => request('/sync', {
     method: 'POST',
-    body: JSON.stringify({ patient_id: patientId, queued_sessions: queuedSessions, queued_alerts: queuedAlerts })
+    body: JSON.stringify({ patient_id: patientId, queued_sessions: queuedSessions, queued_alerts: queuedAlerts, queued_memory_assets: queuedMemoryAssets })
   }),
   updatePatient: (patientId, difficultyTiers) => request(`/patients/${patientId}`, {
     method: 'PATCH',

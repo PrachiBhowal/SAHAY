@@ -86,10 +86,13 @@ function App() {
     const queuedAlerts = pending
       .filter(p => p.type === 'alert' || (!p.type && p.item && 'trigger_type' in p.item))
       .map(p => p.item)
+    const queuedMemoryAssets = pending
+      .filter(p => p.type === 'memory_asset')
+      .map(p => p.item)
 
-    if (queuedSessions.length === 0 && queuedAlerts.length === 0) return { syncedCount: 0 }
+    if (queuedSessions.length === 0 && queuedAlerts.length === 0 && queuedMemoryAssets.length === 0) return { syncedCount: 0 }
 
-    const result = await api.sync(patientId, queuedSessions, queuedAlerts)
+    const result = await api.sync(patientId, queuedSessions, queuedAlerts, queuedMemoryAssets)
     const failedIds = new Set((result.failed || []).map(item => item.id))
     await Promise.all(
       pending

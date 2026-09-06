@@ -23,6 +23,14 @@ const emptyForm = {
   voice_note_url: null,
 };
 
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
 export default function RemindersPanel({ patientId, reminders, setReminders }) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -68,11 +76,21 @@ export default function RemindersPanel({ patientId, reminders, setReminders }) {
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
-        const url = URL.createObjectURL(audioBlob);
-        setForm((prev) => ({ ...prev, voice_note_url: url }));
-        setIsRecording(false);
-        stream.getTracks().forEach((track) => track.stop());
+          try {
+            const audioBlob = new Blob(audioChunksRef.current, {
+              type: mediaRecorder.mimeType || "audio/webm",
+            });
+            // blob: URLs only work in the browser that created them. Persist the
+            // recording as a data URL so the patient app can play it remotely.
+            const dataUrl = await blobToDataUrl(audioBlob);
+            setForm((prev) => ({ ...prev, voice_note_url: dataUrl }));
+          } catch (error) {
+            console.error("Unable to prepare voice note:", error);
+            alert("The recording could not be saved. Please try again.");
+          } finally {
+            setIsRecording(false);
+            stream.getTracks().forEach((track) => track.stop());
+          }
       };
 
       mediaRecorder.start();
@@ -104,14 +122,6 @@ export default function RemindersPanel({ patientId, reminders, setReminders }) {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
-  }
-
-  // Upload mock — swap this with real Person 5 endpoint once ready
-  async function uploadAudioToBackend(blobUrl) {
-    // TODO: Replace with real endpoint once Person 5 confirms POST /audio/upload
-    // For now, return the blob URL (works for demo)
-    console.log("Mock upload — in production, send to Person 5's /audio/upload endpoint");
-    return blobUrl;
   }
 
   async function handleSave(e) {
@@ -266,7 +276,7 @@ export default function RemindersPanel({ patientId, reminders, setReminders }) {
               ) : (
                 <div style={styles.recordingPreview}>
                   <audio controls style={{ width: "100%", marginBottom: 10 }}>
-                    <source src={form.voice_note_url} type="audio/wav" />
+                    <source src={form.voice_note_url} />
                     Your browser does not support the audio element.
                   </audio>
                   <div style={{ display: "flex", gap: 10 }}>
