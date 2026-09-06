@@ -76,21 +76,21 @@ export default function RemindersPanel({ patientId, reminders, setReminders }) {
       };
 
       mediaRecorder.onstop = async () => {
-          try {
-            const audioBlob = new Blob(audioChunksRef.current, {
-              type: mediaRecorder.mimeType || "audio/webm",
-            });
-            // blob: URLs only work in the browser that created them. Persist the
-            // recording as a data URL so the patient app can play it remotely.
-            const dataUrl = await blobToDataUrl(audioBlob);
-            setForm((prev) => ({ ...prev, voice_note_url: dataUrl }));
-          } catch (error) {
-            console.error("Unable to prepare voice note:", error);
-            alert("The recording could not be saved. Please try again.");
-          } finally {
-            setIsRecording(false);
-            stream.getTracks().forEach((track) => track.stop());
-          }
+        try {
+          const audioBlob = new Blob(audioChunksRef.current, {
+            type: mediaRecorder.mimeType || "audio/webm",
+          });
+          // blob: URLs only work in the browser that created them. Persist the
+          // recording as a data URL so the patient app can play it remotely.
+          const dataUrl = await blobToDataUrl(audioBlob);
+          setForm((prev) => ({ ...prev, voice_note_url: dataUrl }));
+        } catch (error) {
+          console.error("Unable to prepare voice note:", error);
+          alert("The recording could not be saved. Please try again.");
+        } finally {
+          setIsRecording(false);
+          stream.getTracks().forEach((track) => track.stop());
+        }
       };
 
       mediaRecorder.start();

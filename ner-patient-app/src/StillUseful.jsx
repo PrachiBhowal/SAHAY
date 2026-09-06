@@ -1,6 +1,7 @@
 // src/StillUseful.jsx
 import { useState, useEffect, useRef } from 'react'
 import { getPatientData, saveMemoryAsset, getMemoryAssets } from './lib/localStorage'
+import { api } from './lib/api'
 import './StillUseful.css'
 
 const PROMPTS = [
@@ -26,6 +27,7 @@ function blobToDataUrl(blob) {
 export default function StillUseful({ onBack }) {
   const [patient, setPatient] = useState(null)
   const [alreadyRecordedToday, setAlreadyRecordedToday] = useState(false)
+  const [savedStories, setSavedStories] = useState([])
   const [isRecording, setIsRecording] = useState(false)
   const [micError, setMicError] = useState(null)
   const [prompt] = useState(PROMPTS[Math.floor(Math.random() * PROMPTS.length)])
@@ -38,6 +40,7 @@ export default function StillUseful({ onBack }) {
       const p = await getPatientData()
       setPatient(p)
       const assets = await getMemoryAssets(p.id)
+      setSavedStories(assets.filter(a => a.type === 'voice').sort((a, b) => new Date(b.created_at) - new Date(a.created_at)))
       const today = todayKey()
       const recordedToday = assets.some(
         a => a.type === 'voice' && a.tags.includes(today)
@@ -97,8 +100,7 @@ export default function StillUseful({ onBack }) {
     recorder.onstop = async () => {
       const blob = new Blob(chunksRef.current, { type: mimeTypeRef.current })
       const url = await blobToDataUrl(blob)
-
-      await saveMemoryAsset({
+      const asset = {
         id: crypto.randomUUID(),
         patient_id: patient.id,
         type: 'voice',
@@ -106,7 +108,16 @@ export default function StillUseful({ onBack }) {
         tags: [todayKey()],
         uploaded_by: patient.id,
         created_at: new Date().toISOString()
-      })
+      }
+
+      await saveMemoryAsset(asset)
+      try {
+        await api.sync(patient.id, [], [], [asset])
+      } catch (error) {
+        console.warn('[patient-app] story queued for later sync:', error)
+      }
+
+      setSavedStories(current => [asset, ...current])
 
       setAlreadyRecordedToday(true)
       stream.getTracks().forEach(track => track.stop())
@@ -153,6 +164,19 @@ export default function StillUseful({ onBack }) {
           </>
         )}
       </div>
+
+      {savedStories.length > 0 && (
+        <section className="still-useful-stories" aria-labelledby="saved-stories-title">
+          <h2 id="saved-stories-title">Saved stories</h2>
+          {savedStories.map(story => (
+            <article className="still-useful-story" key={story.id}>
+              <span>{story.tags?.[0] || 'Saved memory'}</span>
+              <small>{new Date(story.created_at).toLocaleString()}</small>
+              <audio controls preload="metadata" src={story.url} aria-label="Play saved story" />
+            </article>
+          ))}
+        </section>
+      )}
     </div>
   )
 }

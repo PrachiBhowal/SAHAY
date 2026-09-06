@@ -155,6 +155,11 @@ POST   /auth/link-caregiver
   body: { caregiver_code }
   returns: { caregiver_id, caregiver_code, linked: true }
 
+POST   /sync
+  body: { patient_id, queued_sessions, queued_alerts, queued_memory_assets }
+  queued_memory_assets stores patient-recorded voice stories with their
+  client-generated id, data URL, tags, uploaded_by, and created_at.
+
 GET    /patients/:id
   returns: Patient
 
