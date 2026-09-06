@@ -1,0 +1,67 @@
+.comfort-trigger {
+    position: fixed;
+    right: 16px;
+    bottom: calc(76px + env(safe-area-inset-bottom, 8px));
+    z-index: 40;
+}
+
+.comfort-trigger-button {
+    min-height: 48px;
+    padding: 0 14px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 24px;
+    background: var(--color-surface);
+    color: var(--color-brown);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 4px 16px rgba(74, 50, 38, .14);
+    cursor: pointer;
+}
+
+.comfort-trigger-error {
+    margin: 6px 0 0;
+    color: #a13b31;
+    font-size: 12px;
+}
+
+.comfort-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    display: grid;
+    place-items: center;
+    gap: 16px;
+    padding: 28px;
+    background: var(--color-background);
+    color: var(--color-brown);
+    text-align: center;
+}
+
+.comfort-overlay-title {
+    font-family: var(--font-display);
+    font-size: 28px;
+}
+
+.comfort-overlay-media {
+    max-width: min(100%, 420px);
+    max-height: 48svh;
+    border-radius: 12px;
+}
+
+.comfort-overlay-message {
+    max-width: 34rem;
+    color: var(--color-text-muted);
+}
+
+.comfort-overlay-close {
+    min-height: 56px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--color-terracotta);
+    color: #fff;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+}

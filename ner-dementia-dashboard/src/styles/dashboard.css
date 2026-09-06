@@ -466,3 +466,19 @@ textarea {
     font-weight: 800;
     cursor: pointer;
 }
+
+.dashboard-patients-tab {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.dashboard-patients-tab .dashboard-empty-screen {
+    min-height: 0;
+    padding: 0;
+    place-items: stretch;
+}
+
+.dashboard-patients-tab .dashboard-empty-panel {
+    width: 100%;
+}

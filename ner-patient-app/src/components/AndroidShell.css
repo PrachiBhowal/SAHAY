@@ -1,257 +1,257 @@
 .android-app-bar {
-  min-height: 72px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+    min-height: 72px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .android-app-bar-action,
 .android-app-bar-switch,
 .android-modal-close {
-  min-width: 44px;
-  min-height: 44px;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  color: var(--color-brown);
-  font: inherit;
-  font-weight: 800;
-  cursor: pointer;
+    min-width: 44px;
+    min-height: 44px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--color-brown);
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
 }
 
 .android-app-bar-action {
-  font-size: 22px;
+    font-size: 22px;
 }
 
 .android-app-bar-switch {
-  padding: 0 10px;
-  color: var(--color-terracotta);
-  font-size: 13px;
+    padding: 0 10px;
+    color: var(--color-terracotta);
+    font-size: 13px;
 }
 
 .android-app-bar-title {
-  min-width: 0;
-  flex: 1;
-  display: grid;
-  gap: 1px;
+    min-width: 0;
+    flex: 1;
+    display: grid;
+    gap: 1px;
 }
 
 .android-app-bar-title strong {
-  color: var(--color-terracotta);
-  font-size: 16px;
-  letter-spacing: .08em;
+    color: var(--color-terracotta);
+    font-size: 16px;
+    letter-spacing: .08em;
 }
 
 .android-app-bar-title span {
-  overflow: hidden;
-  color: var(--color-text-muted);
-  font-size: 14px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+    overflow: hidden;
+    color: var(--color-text-muted);
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .android-bottom-nav {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 30;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 8px));
-  border-top: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, .97);
-  box-shadow: 0 -5px 18px rgba(74, 50, 38, .1);
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 8px));
+    border-top: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, .97);
+    box-shadow: 0 -5px 18px rgba(74, 50, 38, .1);
 }
 
 .android-bottom-nav button {
-  min-height: 60px;
-  display: grid;
-  place-items: center;
-  gap: 2px;
-  border: 0;
-  background: transparent;
-  color: var(--color-text-muted);
-  font: inherit;
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
+    min-height: 60px;
+    display: grid;
+    place-items: center;
+    gap: 2px;
+    border: 0;
+    background: transparent;
+    color: var(--color-text-muted);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
 }
 
 .android-bottom-nav button span {
-  font-size: 20px;
+    font-size: 20px;
 }
 
 .android-bottom-nav button.is-active {
-  color: var(--color-terracotta);
+    color: var(--color-terracotta);
 }
 
 .android-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: grid;
-  place-items: center;
-  padding: 18px;
-  background: rgba(58, 46, 36, .45);
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    background: rgba(58, 46, 36, .45);
 }
 
 .android-portal-modal {
-  width: min(100%, 480px);
-  max-height: min(90svh, 720px);
-  overflow: auto;
-  padding: 24px;
-  border-radius: 16px;
-  background: var(--color-surface);
-  box-shadow: 0 20px 50px rgba(58, 46, 36, .28);
+    width: min(100%, 480px);
+    max-height: min(90svh, 720px);
+    overflow: auto;
+    padding: 24px;
+    border-radius: 16px;
+    background: var(--color-surface);
+    box-shadow: 0 20px 50px rgba(58, 46, 36, .28);
 }
 
 .android-modal-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
 }
 
 .android-modal-kicker {
-  margin: 0 0 4px;
-  color: var(--color-terracotta);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: .1em;
-  text-transform: uppercase;
+    margin: 0 0 4px;
+    color: var(--color-terracotta);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
 }
 
 .android-modal-header h2 {
-  margin: 0;
-  color: var(--color-brown);
-  font-family: var(--font-display);
+    margin: 0;
+    color: var(--color-brown);
+    font-family: var(--font-display);
 }
 
 .android-modal-close {
-  font-size: 18px;
+    font-size: 18px;
 }
 
 .android-identity-card {
-  display: grid;
-  gap: 4px;
-  margin-top: 20px;
-  padding: 14px;
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  background: var(--color-background);
+    display: grid;
+    gap: 4px;
+    margin-top: 20px;
+    padding: 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-background);
 }
 
 .android-identity-card span {
-  color: var(--color-text-muted);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+    color: var(--color-text-muted);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
 }
 
 .android-identity-card strong {
-  color: var(--color-terracotta);
-  overflow-wrap: anywhere;
+    color: var(--color-terracotta);
+    overflow-wrap: anywhere;
 }
 
 .android-identity-card small {
-  color: var(--color-text-muted);
+    color: var(--color-text-muted);
 }
 
 .android-link-caregiver-form {
-  display: grid;
-  gap: 8px;
-  margin-top: 20px;
+    display: grid;
+    gap: 8px;
+    margin-top: 20px;
 }
 
 .android-link-caregiver-form label {
-  color: var(--color-brown);
-  font-weight: 800;
+    color: var(--color-brown);
+    font-weight: 800;
 }
 
 .android-link-caregiver-form input {
-  min-height: 52px;
-  padding: 0 12px;
-  border: 2px solid var(--color-border-strong);
-  border-radius: 10px;
-  background: var(--color-surface);
-  color: var(--color-text);
-  font: inherit;
+    min-height: 52px;
+    padding: 0 12px;
+    border: 2px solid var(--color-border-strong);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
 }
 
 .android-link-caregiver-form button,
 .android-sync-row button,
 .android-modal-footer button {
-  min-height: 48px;
-  border: 0;
-  border-radius: 9px;
-  background: var(--color-terracotta);
-  color: #fff;
-  font: inherit;
-  font-weight: 800;
-  cursor: pointer;
+    min-height: 48px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--color-terracotta);
+    color: #fff;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
 }
 
 .android-link-caregiver-form button:disabled {
-  cursor: wait;
-  opacity: .55;
+    cursor: wait;
+    opacity: .55;
 }
 
 .android-sync-row,
 .android-modal-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 20px;
 }
 
 .android-sync-row {
-  color: var(--color-text-muted);
-  font-size: 14px;
+    color: var(--color-text-muted);
+    font-size: 14px;
 }
 
 .android-sync-row button {
-  min-height: 42px;
-  padding: 0 12px;
-  background: var(--color-sage);
-  font-size: 13px;
+    min-height: 42px;
+    padding: 0 12px;
+    background: var(--color-sage);
+    font-size: 13px;
 }
 
 .android-portal-message,
 .android-portal-error {
-  margin: 14px 0 0;
-  font-size: 14px;
-  font-weight: 700;
+    margin: 14px 0 0;
+    font-size: 14px;
+    font-weight: 700;
 }
 
 .android-portal-message {
-  color: var(--color-sage);
+    color: var(--color-sage);
 }
 
 .android-portal-error {
-  color: #a13b31;
+    color: #a13b31;
 }
 
 .android-modal-footer {
-  padding-top: 18px;
-  border-top: 1px solid var(--color-border);
+    padding-top: 18px;
+    border-top: 1px solid var(--color-border);
 }
 
 .android-modal-footer button {
-  padding: 0 14px;
-  background: transparent;
-  color: var(--color-terracotta);
-  font-size: 14px;
+    padding: 0 14px;
+    background: transparent;
+    color: var(--color-terracotta);
+    font-size: 14px;
 }
 
 .android-modal-footer button:last-child {
-  background: var(--color-terracotta);
-  color: #fff;
+    background: var(--color-terracotta);
+    color: #fff;
 }

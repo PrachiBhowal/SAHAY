@@ -183,7 +183,7 @@ export default function App() {
     { id: "overview", label: "Overview" },
     { id: "reminders", label: "Reminders" },
     { id: "alerts", label: "Alerts" },
-    ...(isAsha ? [{ id: "patients", label: "Patients" }] : []),
+    { id: "patients", label: "Patients" },
   ];
 
   // Last active = most recent session timestamp (Patient in CONTRACTS.md has no last_active field)
@@ -296,8 +296,18 @@ export default function App() {
 
         {activeTab === "alerts" && <AlertsPanel patientId={activePatient.id} />}
 
-        {activeTab === "patients" && isAsha && (
-          <PatientsList patients={patients} activePatientId={activePatient.id} onSelect={handleSelectPatient} />
+        {activeTab === "patients" && (
+          <div className="dashboard-patients-tab">
+            <LinkPatientCard
+              user={user}
+              onLinked={(patient) => {
+                setPatients((current) => current.some((item) => item.id === patient.id) ? current : [...current, patient]);
+                setActivePatient(patient);
+              }}
+              onLogout={handleLogout}
+            />
+            <PatientsList patients={patients} activePatientId={activePatient.id} onSelect={handleSelectPatient} />
+          </div>
         )}
       </main>
       <nav className="dashboard-bottom-nav" aria-label="Dashboard sections">
